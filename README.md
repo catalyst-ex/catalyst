@@ -34,9 +34,19 @@ catalyst/
 │   │   │   └── executor.ex         # Side-effect Runner
 │   │   └── plugin/
 │   │       └── phoenix_base.ex     # Core Generator Plugin 
-|   |       └── elixir_base.ex      # Core Generator Plugin
+│   │       └── elixir_base.ex      # Core Generator Plugin
 │   └── mix/
 │       └── tasks/
 │           └── catalyst.new.ex     # CLI Entry Point
 └── mix.exs
 ```
+
+## Commands
+
+To generate plain elixir app:
+
+> mix catalyst.new [app_name] --plain
+
+To generate phoenix app:
+
+> mix catalyst.new [app_name]
