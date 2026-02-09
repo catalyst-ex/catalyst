@@ -9,16 +9,16 @@ defmodule Catalyst.Plugin.ElixirBaseTest do
     actions = ElixirBase.run(opts) |> Catalyst.Plugin.normalize_actions()
 
     assert [
-      %Action.SystemCommand{
-        cmd: "mix",
-        args: ["new", "my_app", "--sup"]
-      },
-      %Action.SystemCommand{
-        cmd: "mix",
-        args: ["deps.get"],
-        cd: "my_app"
-      }
-    ] = actions
+             %Action.SystemCommand{
+               cmd: "mix",
+               args: ["new", "my_app", "--sup"]
+             },
+             %Action.SystemCommand{
+               cmd: "mix",
+               args: ["deps.get"],
+               cd: "my_app"
+             }
+           ] = actions
   end
 
   test "can disable supervision tree" do
