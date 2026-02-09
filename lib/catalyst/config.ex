@@ -1,5 +1,5 @@
 defmodule Catalyst.Config do
-  defstruct [:version, :app, :plugins, :__private__]
+  defstruct [:version, :app, :plugins]
 
   defmodule App do
     defstruct [:name, :file, :module]

@@ -1,41 +1,31 @@
 defmodule Mix.Tasks.Catalyst.New do
   use Mix.Task
+  alias Catalyst.Config.Loader
 
-  @shortdoc "Creates a new Elixir application (Default: Phoenix, use --plain for basic)"
+  @shortdoc "Creates a new app from a configuration file"
 
   def run(args) do
-    {opts, argv} = OptionParser.parse!(args, switches: [plain: :boolean])
-    {app_name, _} = parse_app_name(argv)
+    # Parse args
+    case args do
+      [config_path] ->
+        generate_from_config(config_path)
 
-    app_file = Macro.underscore(app_name)
-    app_module = Macro.camelize(app_name)
-
-    # logic to swap the base plugin
-    base_plugin =
-      if opts[:plain] do
-        {Catalyst.Plugin.ElixirBase, sup: true}
-      else
-        # Default to Phoenix
-        {Catalyst.Plugin.PhoenixBase, phoenix: "1.7.10"}
-      end
-
-    config = %Catalyst.Config{
-      version: 1,
-      app: %Catalyst.Config.App{
-        name: app_name,
-        file: app_file,
-        module: app_module
-      },
-      plugins: [
-        base_plugin
-        # Future plugins go here
-      ]
-    }
-
-    Catalyst.build(config)
-    IO.puts("Done! Project ready in /#{app_file}")
+      _ ->
+        Mix.raise("Usage: mix catalyst.new <path/to/config.exs>")
+    end
   end
 
-  defp parse_app_name([name | _]), do: {name, []}
-  defp parse_app_name([]), do: Mix.raise("Usage: mix catalyst.new MyApp [--plain]")
+  defp generate_from_config(path) do
+    IO.puts("Loading configuration from #{path}...")
+
+    # Load configuration
+    config = Loader.load!(path)
+
+    IO.puts("Starting Catalyst for #{config.app.name}...")
+
+    # Build the app
+    Catalyst.build(config)
+
+    IO.puts("Done! App ready in /#{config.app.file}")
+  end
 end
