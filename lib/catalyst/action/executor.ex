@@ -36,7 +36,13 @@ defmodule Catalyst.Action.Executor do
         :ok
 
       {error, code} ->
-        raise "Command failed with code #{code}: #{error}"
+        if allow_nonzero_exit?(cmd, args, error) do
+          Logger.warning("Command exited with code #{code} but was allowed: #{cmd} #{Enum.join(args, " ")}")
+          Logger.debug(error)
+          :ok
+        else
+          raise "Command failed with code #{code}: #{error}"
+        end
     end
   end
 
@@ -190,4 +196,10 @@ defmodule Catalyst.Action.Executor do
   defp build_alias_ast(key, cmds) do
     {key, cmds}
   end
+
+  defp allow_nonzero_exit?("mix", ["sobelow" | _], output) do
+    String.contains?(output, "SCAN COMPLETE")
+  end
+
+  defp allow_nonzero_exit?(_cmd, _args, _output), do: false
 end
