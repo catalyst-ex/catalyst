@@ -46,7 +46,9 @@ defmodule Catalyst.MixProject do
 
   # Dependencies
   defp deps do
-    []
+    [
+      {:sourceror, "~> 1.0"}
+    ]
   end
 
   # Compilation Paths
