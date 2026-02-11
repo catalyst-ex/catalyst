@@ -23,6 +23,13 @@ defmodule Mix.Tasks.Catalyst.New do
 
     IO.puts("Starting Catalyst for #{config.app.name}...")
 
+    # check if the app directory already exists to prevent overwriting
+    if File.exists?(config.app.file) do
+      Mix.raise(
+        "Directory #{config.app.file} already exists. Please choose a different app name or remove the existing directory."
+      )
+    end
+
     # Build the app
     Catalyst.build(config)
 
