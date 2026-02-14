@@ -28,7 +28,7 @@ defmodule Catalyst.Config.Loader do
     # Basic validation: Ensure required fields are present
     cond do
       is_nil(config.app.name) -> raise "Config Error: app.name is missing"
-      is_nil(config.app.file) -> raise "Config Error: app.file (path) is missing"
+      is_nil(config.app.path) -> raise "Config Error: app.path is missing"
       is_nil(config.app.module) -> raise "Config Error: app.module is missing"
       !is_list(config.plugins) -> raise "Config Error: plugins must be a list"
       true -> config

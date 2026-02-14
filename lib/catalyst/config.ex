@@ -2,6 +2,6 @@ defmodule Catalyst.Config do
   defstruct [:version, :app, :plugins]
 
   defmodule App do
-    defstruct [:name, :file, :module]
+    defstruct [:name, :path, :module]
   end
 end
