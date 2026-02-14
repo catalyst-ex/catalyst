@@ -37,7 +37,10 @@ defmodule Catalyst.Action.Executor do
 
       {error, code} ->
         if allow_nonzero_exit?(cmd, args, error) do
-          Logger.warning("Command exited with code #{code} but was allowed: #{cmd} #{Enum.join(args, " ")}")
+          Logger.warning(
+            "Command exited with code #{code} but was allowed: #{cmd} #{Enum.join(args, " ")}"
+          )
+
           Logger.debug(error)
           :ok
         else
