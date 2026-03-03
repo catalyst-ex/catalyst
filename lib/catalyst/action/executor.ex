@@ -13,6 +13,9 @@ defmodule Catalyst.Action.Executor do
   def run(%Action.AppendFile{} = action), do: handle_append_file(action)
   def run(%Action.AddAlias{} = action), do: handle_add_alias(action)
   def run(%Action.AddDependency{} = action), do: handle_add_dependency(action)
+  def run(%Action.DeleteFile{} = action), do: handle_delete_file(action)
+  def run(%Action.MoveFile{} = action), do: handle_move_file(action)
+  def run(%Action.Function{} = action), do: handle_function(action)
 
   # Fallback for unknown actions
   def run(action) do
@@ -100,6 +103,22 @@ defmodule Catalyst.Action.Executor do
         list_zipper
       end
     end)
+  end
+
+  defp handle_delete_file(%Action.DeleteFile{path: path}) do
+    Logger.info("Deleting file: #{path}")
+    File.rm(path)
+  end
+
+  defp handle_move_file(%Action.MoveFile{from: from, to: to}) do
+    Logger.info("Moving file from #{from} to #{to}")
+    File.mkdir_p!(Path.dirname(to))
+    File.rename(from, to)
+  end
+
+  defp handle_function(%Action.Function{module: mod, function: fun, args: args}) do
+    Logger.info("Executing function: #{mod}.#{fun}(#{Enum.map_join(args, ", ", &inspect/1)})")
+    apply(mod, fun, args || [])
   end
 
   # --- AST Patching Logic for Mix Files ---
