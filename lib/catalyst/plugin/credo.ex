@@ -13,7 +13,7 @@ defmodule Catalyst.Plugin.Credo do
         target_file: mix_file
       },
       %Action.AddAlias{
-        key: :credo,
+        key: :quality,
         commands: ["credo"],
         target_file: mix_file
       },
@@ -24,17 +24,6 @@ defmodule Catalyst.Plugin.Credo do
       %Action.SystemCommand{
         cmd: "mix",
         args: ["deps.get"],
-        cd: opts[:app_path]
-      },
-      # Format the code to ensure the new alias is properly formatted before running Credo
-      %Action.SystemCommand{
-        cmd: "mix",
-        args: ["format"],
-        cd: opts[:app_path]
-      },
-      %Action.SystemCommand{
-        cmd: "mix",
-        args: ["credo"],
         cd: opts[:app_path]
       }
     ]

@@ -92,14 +92,12 @@ defmodule Catalyst.Action.Executor do
   defp handle_add_alias(%Action.AddAlias{target_file: path} = action) do
     Logger.info("Adding alias: #{action.key}")
 
-    patch_mix_file(path, :aliases, fn zipper ->
-      alias_entry = build_alias_ast(action.key, action.commands)
-
-      if zipper do
-        Zipper.append_child(zipper, alias_entry)
+    patch_mix_file(path, :aliases, fn list_zipper ->
+      if list_zipper do
+        upsert_alias_in_list(list_zipper, action.key, action.commands)
       else
-        Logger.warning("⚠️ Could not find 'aliases' function in #{path}. Skipping.")
-        zipper
+        Logger.warning("Could not find 'aliases' function in #{path}. Skipping.")
+        list_zipper
       end
     end)
   end
@@ -200,7 +198,67 @@ defmodule Catalyst.Action.Executor do
     {key, cmds}
   end
 
-  defp allow_nonzero_exit?("mix", ["sobelow" | _], output) do
+  defp upsert_alias_in_list(list_zipper, key, new_cmds) do
+    found_key_zipper =
+      Sourceror.Zipper.find(list_zipper, fn
+        # Keyword lists in AST are tuples: {:key, value}
+        {^key, _} -> true
+        {{:__block__, _, [^key]}, _} -> true
+        _ -> false
+      end)
+
+    case found_key_zipper do
+      nil ->
+        # The key doesn't exist yet. Append the brand new tuple to the list.
+        alias_ast = build_alias_ast(key, new_cmds)
+        Sourceror.Zipper.append_child(list_zipper, alias_ast)
+
+      key_zipper ->
+        val_zipper = key_zipper |> Sourceror.Zipper.down() |> Sourceror.Zipper.right()
+        val_ast = Sourceror.Zipper.node(val_zipper)
+
+        existing_cmds = extract_commands(val_ast)
+
+        cmds_to_add = Enum.reject(new_cmds, &(&1 in existing_cmds))
+
+        if cmds_to_add == [] do
+          list_zipper
+        else
+          inner_list_zipper =
+            Sourceror.Zipper.find(val_zipper, fn
+              list when is_list(list) -> true
+              _ -> false
+            end)
+
+          if inner_list_zipper do
+            Enum.reduce(cmds_to_add, inner_list_zipper, fn cmd, z ->
+              cmd_ast = {:__block__, [], [cmd]}
+              Sourceror.Zipper.append_child(z, cmd_ast)
+            end)
+          else
+            new_list_ast =
+              {:__block__, [],
+               [
+                 [val_ast | Enum.map(cmds_to_add, fn cmd -> {:__block__, [], [cmd]} end)]
+               ]}
+
+            Sourceror.Zipper.replace(val_zipper, new_list_ast)
+          end
+        end
+    end
+  end
+
+  defp extract_commands(ast) do
+    {_, acc} =
+      Macro.prewalk(ast, [], fn
+        str, acc when is_binary(str) -> {str, [str | acc]}
+        node, acc -> {node, acc}
+      end)
+
+    Enum.reverse(acc)
+  end
+
+  defp allow_nonzero_exit?("mix", ["quality" | _], output) do
     String.contains?(output, "SCAN COMPLETE")
   end
 

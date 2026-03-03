@@ -13,8 +13,8 @@ defmodule Catalyst.Plugin.Sobelow do
         target_file: mix_file
       },
       %Action.AddAlias{
-        key: :sobelow,
-        commands: ["format --check-formatted", "sobelow --exit low"],
+        key: :quality,
+        commands: ["sobelow --exit low"],
         target_file: mix_file
       },
       %Action.SystemCommand{
@@ -25,17 +25,6 @@ defmodule Catalyst.Plugin.Sobelow do
       %Action.AppendFile{
         path: Path.join(opts[:app_path], ".gitignore"),
         content: "\n# Sobelow Security Logs\n.sobelow"
-      },
-      # Format the code to ensure the new alias is properly formatted before running Sobelow
-      %Action.SystemCommand{
-        cmd: "mix",
-        args: ["format"],
-        cd: opts[:app_path]
-      },
-      %Action.SystemCommand{
-        cmd: "mix",
-        args: ["sobelow"],
-        cd: opts[:app_path]
       }
     ]
   end
