@@ -14,7 +14,7 @@ defmodule Catalyst.Plugin.Sobelow do
       },
       %Action.AddAlias{
         key: :quality,
-        commands: ["sobelow --exit low"],
+        commands: ["format","sobelow --exit low"],
         target_file: mix_file
       },
       %Action.SystemCommand{

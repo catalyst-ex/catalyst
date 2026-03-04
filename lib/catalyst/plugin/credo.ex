@@ -14,7 +14,7 @@ defmodule Catalyst.Plugin.Credo do
       },
       %Action.AddAlias{
         key: :quality,
-        commands: ["credo"],
+        commands: ["format","credo"],
         target_file: mix_file
       },
       %Action.AddFile{
