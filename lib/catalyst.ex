@@ -5,8 +5,11 @@ defmodule Catalyst do
     raw_actions =
       config.plugins
       |> Enum.flat_map(fn {plugin_mod, opts} ->
-        full_opts = Keyword.merge(opts, app_path: config.app.path)
-        full_opts = Keyword.merge(full_opts, app_name: config.app.name)
+        full_opts =
+          opts
+          |> Keyword.merge(app_path: config.app.path)
+          |> Keyword.merge(app_name: config.app.name)
+          |> Keyword.merge(app_module: config.app.module)
 
         {:ok, init_opts} = plugin_mod.init(full_opts, config)
         plugin_mod.run(init_opts)

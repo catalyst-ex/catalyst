@@ -20,6 +20,7 @@ defmodule Catalyst.Action do
   # --- Misc. Actions ---
   defmodule Function, do: defstruct([:module, :function, :args])
   defmodule PatchFile, do: defstruct([:path, :ops])
+  defmodule AddConfig, do: defstruct([:target_file, :app, :module, :opts])
 
   @type t ::
           %SystemCommand{}
@@ -32,4 +33,5 @@ defmodule Catalyst.Action do
           | %MoveFile{}
           | %DeleteFile{}
           | %Function{}
+          | %AddConfig{}
 end

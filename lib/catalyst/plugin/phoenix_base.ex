@@ -3,10 +3,12 @@ defmodule Catalyst.Plugin.PhoenixBase do
 
   @impl true
   def run(opts) do
+    flags = opts[:flags] || []
+
     [
       %Action.SystemCommand{
         cmd: "mix",
-        args: ["phx.new", opts[:app_path], "--no-install"]
+        args: ["phx.new", opts[:app_path] | flags]
       },
       %Action.SystemCommand{
         cmd: "mix",

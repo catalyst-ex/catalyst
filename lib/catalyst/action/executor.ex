@@ -16,7 +16,7 @@ defmodule Catalyst.Action.Executor do
   def run(%Action.DeleteFile{} = action), do: handle_delete_file(action)
   def run(%Action.MoveFile{} = action), do: handle_move_file(action)
   def run(%Action.Function{} = action), do: handle_function(action)
-
+  def run(%Action.AddConfig{} = action), do: handle_add_config(action)
   # Fallback for unknown actions
   def run(action) do
     Logger.warning("Unknown action encountered: #{inspect(action)}")
@@ -119,6 +119,70 @@ defmodule Catalyst.Action.Executor do
   defp handle_function(%Action.Function{module: mod, function: fun, args: args}) do
     Logger.info("Executing function: #{mod}.#{fun}(#{Enum.map_join(args, ", ", &inspect/1)})")
     apply(mod, fun, args || [])
+  end
+
+  defp handle_add_config(%Action.AddConfig{target_file: path} = action) do
+    Logger.info(
+      "Configuring: #{inspect(action.app)} #{if action.module, do: inspect(action.module)}"
+    )
+
+    unless File.exists?(path), do: raise("Config file not found: #{path}")
+
+    source = File.read!(path)
+    zipper = source |> Sourceror.parse_string!() |> Sourceror.Zipper.zip()
+
+    # Check if this exact config block already exists to prevent duplicates
+    if config_exists?(zipper, action.app, action.module) do
+      Logger.info("   ↳ Config already exists, skipping.")
+    else
+      new_ast = build_config_ast(action.app, action.module, action.opts)
+
+      new_zipper =
+        case find_import_config(zipper) do
+          nil ->
+            Sourceror.Zipper.append_child(zipper, new_ast)
+
+          import_zipper ->
+            Sourceror.Zipper.insert_left(import_zipper, new_ast)
+        end
+
+      new_source = new_zipper |> Sourceror.Zipper.root() |> Sourceror.to_string()
+      formatted = Code.format_string!(new_source)
+      File.write!(path, formatted)
+    end
+  end
+
+  # --- Helpers for Config Injection ---
+
+  defp config_exists?(zipper, app, mod) do
+    # Searches the AST for an exact match of the config signature
+    found =
+      Sourceror.Zipper.find(zipper, fn
+        {:config, _, [^app, ^mod, _]} -> true
+        {:config, _, [^app, _]} when is_nil(mod) -> true
+        _ -> false
+      end)
+
+    found != nil
+  end
+
+  defp find_import_config(zipper) do
+    Sourceror.Zipper.find(zipper, fn
+      {:import_config, _, _} -> true
+      _ -> false
+    end)
+  end
+
+  defp build_config_ast(app, nil, opts) do
+    quote do
+      config unquote(app), unquote(opts)
+    end
+  end
+
+  defp build_config_ast(app, mod, opts) do
+    quote do
+      config unquote(app), unquote(mod), unquote(opts)
+    end
   end
 
   # --- AST Patching Logic for Mix Files ---
