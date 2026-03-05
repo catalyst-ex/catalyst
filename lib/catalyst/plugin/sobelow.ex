@@ -8,13 +8,13 @@ defmodule Catalyst.Plugin.Sobelow do
     [
       %Action.AddDependency{
         name: :sobelow,
-        version: "#{opts[:sobelow] || "0.14.0"}",
-        opts: [only: [:dev, :test], runtime: false],
+        version: "0.14.0",
+        opts: opts[:flags],
         target_file: mix_file
       },
       %Action.AddAlias{
         key: :quality,
-        commands: ["format","sobelow --exit low"],
+        commands: ["format", "sobelow --exit low"],
         target_file: mix_file
       },
       %Action.SystemCommand{

@@ -9,12 +9,12 @@ defmodule Catalyst.Plugin.Credo do
       %Action.AddDependency{
         name: :credo,
         version: "~> 1.7",
-        opts: [only: [:dev, :test], runtime: false],
+        opts: opts[:flags],
         target_file: mix_file
       },
       %Action.AddAlias{
         key: :quality,
-        commands: ["format","credo"],
+        commands: ["format", "credo"],
         target_file: mix_file
       },
       %Action.AddFile{
