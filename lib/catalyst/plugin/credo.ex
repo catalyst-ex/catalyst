@@ -29,6 +29,14 @@ defmodule Catalyst.Plugin.Credo do
     ]
   end
 
+  @impl true
+  def post_validate(opts) do
+    app_path = opts[:app_path]
+
+    command = %Action.SystemCommand{cmd: "mix", args: ["credo"], cd: app_path}
+    Catalyst.Plugin.run_system_command(command)
+  end
+
   defp read_template!(filename) do
     Application.app_dir(:catalyst, ["priv", "templates", filename])
     |> File.read!()

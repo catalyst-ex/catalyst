@@ -47,7 +47,7 @@ defmodule Catalyst.Action.Executor do
           Logger.debug(error)
           :ok
         else
-          raise "Command failed with code #{code}: #{error}"
+          raise "Command failed with code #{code}:\n\n #{error}"
         end
     end
   end

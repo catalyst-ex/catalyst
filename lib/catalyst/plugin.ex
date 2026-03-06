@@ -1,4 +1,6 @@
 defmodule Catalyst.Plugin do
+  alias Catalyst.Action
+
   @callback init(opts :: keyword(), config :: map()) :: {:ok, keyword()} | {:error, term()}
   @callback run(opts :: keyword()) :: [Catalyst.Action.t() | {module(), keyword()}]
   @callback post_validate(opts :: keyword()) :: :ok | {:error, term()}
@@ -27,5 +29,17 @@ defmodule Catalyst.Plugin do
       {mod, opts} when is_atom(mod) and is_list(opts) ->
         struct!(mod, opts)
     end)
+  end
+
+  @doc """
+  Executes a system command action through the action executor.
+  """
+  def run_system_command(%Action.SystemCommand{} = command) do
+    try do
+      Catalyst.Action.Executor.run(command)
+      :ok
+    rescue
+      error -> {:error, Exception.message(error)}
+    end
   end
 end

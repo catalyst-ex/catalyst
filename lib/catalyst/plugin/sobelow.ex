@@ -1,5 +1,6 @@
 defmodule Catalyst.Plugin.Sobelow do
   use Catalyst.Plugin
+  require Logger
 
   @impl true
   def run(opts) do
@@ -27,5 +28,31 @@ defmodule Catalyst.Plugin.Sobelow do
         content: "\n# Sobelow Security Logs\n.sobelow"
       }
     ]
+  end
+
+  @impl true
+  def post_validate(opts) do
+    app_path = opts[:app_path]
+    strict? = Keyword.get(opts, :strict_post_validate, false)
+
+    command = %Action.SystemCommand{cmd: "mix", args: ["sobelow", "--exit", "low"], cd: app_path}
+
+    case Catalyst.Plugin.run_system_command(command) do
+      :ok ->
+        :ok
+
+      {:error, message} ->
+        message = "mix sobelow --exit low failed:\n\n #{message}"
+
+        if strict? do
+          {:error, message}
+        else
+          Logger.warning(
+            "Sobelow post-validation reported issues but strict mode is off.\n\n#{message}"
+          )
+
+          :ok
+        end
+    end
   end
 end
