@@ -10,6 +10,7 @@ defmodule Catalyst do
           |> Keyword.merge(app_path: config.app.path)
           |> Keyword.merge(app_name: config.app.name)
           |> Keyword.merge(app_module: config.app.module)
+          |> Keyword.merge(mode: config.mode)
 
         {:ok, init_opts} = plugin_mod.init(full_opts, config)
 

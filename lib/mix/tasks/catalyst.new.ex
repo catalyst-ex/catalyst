@@ -21,18 +21,41 @@ defmodule Mix.Tasks.Catalyst.New do
     # Load configuration
     config = Loader.load!(path)
 
-    IO.puts("Starting Catalyst for #{config.app.name}...")
+    case config.mode do
+      :existing ->
+        IO.puts("Running Catalyst on existing project #{config.app.name}...")
+        ensure_existing_project!(config.app.path)
 
-    # check if the app directory already exists to prevent overwriting
-    if File.exists?(config.app.path) do
-      Mix.raise(
-        "Directory #{config.app.path} already exists. Please choose a different app name or remove the existing directory."
-      )
+      :new ->
+        IO.puts("Starting Catalyst for #{config.app.name}...")
+        ensure_new_project_target!(config.app.path)
     end
 
     # Build the app
     Catalyst.build(config)
 
-    IO.puts("Done! App ready in /#{config.app.path}")
+    IO.puts("Done! Catalyst finished in #{Path.expand(config.app.path)}")
+  end
+
+  defp ensure_existing_project!(path) do
+    unless File.exists?(path) do
+      Mix.raise(
+        "Directory #{path} does not exist. Set app.path to an existing project directory."
+      )
+    end
+
+    mix_file = Path.join(path, "mix.exs")
+
+    unless File.exists?(mix_file) do
+      Mix.raise("Expected Mix project at #{path}, but #{mix_file} was not found.")
+    end
+  end
+
+  defp ensure_new_project_target!(path) do
+    if File.exists?(path) do
+      Mix.raise(
+        "Directory #{path} already exists. Set mode: :existing to run Catalyst on an existing app."
+      )
+    end
   end
 end

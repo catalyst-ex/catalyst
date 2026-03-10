@@ -43,10 +43,56 @@ catalyst/
 
 ## Commands
 
-To generate plain elixir app:
+Catalyst runs from a config file:
 
-> mix catalyst.new [app_name] --plain
+> mix catalyst.new path/to/config.exs
 
-To generate phoenix app:
+## Configuration
 
-> mix catalyst.new [app_name]
+Catalyst config supports two modes:
+
+- `mode: :new` — scaffold a brand-new project at `app.path`
+- `mode: :existing` — run Catalyst actions against an existing Mix project
+
+Example (`mode: :new`):
+
+```elixir
+alias Catalyst.Config
+alias Catalyst.Plugin
+
+%Config{
+	version: 1,
+	mode: :new,
+	app: %Config.App{
+		name: "My App",
+		path: "my_app",
+		module: "MyApp"
+	},
+	plugins: [
+		{Plugin.PhoenixBase,
+		 phoenix: "1.18.4",
+		 flags: [install: false, ecto: false, mailer: false]},
+		{Plugin.Credo, flags: [only: [:dev, :test], runtime: false]},
+		{Plugin.Sobelow, flags: [only: [:dev, :test], runtime: false], strict_post_validate: false}
+	]
+}
+```
+
+Example (`mode: :existing`):
+
+```elixir
+alias Catalyst.Config
+alias Catalyst.Plugin
+
+%Config{
+	version: 1,
+	mode: :existing,
+	app: %Config.App{
+		path: "."
+	},
+	plugins: [
+		{Plugin.Credo, flags: [only: [:dev, :test], runtime: false]},
+		{Plugin.Sobelow, flags: [only: [:dev, :test], runtime: false], strict_post_validate: false}
+	]
+}
+```

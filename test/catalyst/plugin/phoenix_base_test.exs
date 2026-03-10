@@ -66,4 +66,17 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
     assert %Action.SystemCommand{args: args} = Enum.at(actions, 0)
     assert args == ["phx.new", "my_app", "--install", "--ecto"]
   end
+
+  test "does not scaffold when targeting existing project" do
+    opts = [
+      app_path: "my_app",
+      app_name: "My App",
+      mode: :existing,
+      flags: [install: false]
+    ]
+
+    actions = PhoenixBase.run(opts)
+
+    assert actions == []
+  end
 end

@@ -29,4 +29,12 @@ defmodule Catalyst.Plugin.ElixirBaseTest do
     assert %Action.SystemCommand{cmd: "mix", args: ["new", "simple_lib"]} = Enum.at(actions, 0)
     refute "--sup" in Enum.at(actions, 0).args
   end
+
+  test "does not scaffold when targeting existing project" do
+    opts = [app_path: "my_app", mode: :existing]
+
+    actions = ElixirBase.run(opts) |> Catalyst.Plugin.normalize_actions()
+
+    assert actions == []
+  end
 end
