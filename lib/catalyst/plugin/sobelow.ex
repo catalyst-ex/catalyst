@@ -1,6 +1,6 @@
 defmodule Catalyst.Plugin.Sobelow do
   use Catalyst.Plugin
-  require Logger
+  alias Catalyst.CLI
 
   @impl true
   def run(opts) do
@@ -47,7 +47,7 @@ defmodule Catalyst.Plugin.Sobelow do
         if strict? do
           {:error, message}
         else
-          Logger.warning(
+          CLI.warn(
             "Sobelow post-validation reported issues but strict mode is off.\n\n#{message}"
           )
 

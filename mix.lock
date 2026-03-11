@@ -1,3 +1,5 @@
 %{
+  "owl": {:hex, :owl, "0.13.0", "26010e066d5992774268f3163506972ddac0a7e77bfe57fa42a250f24d6b876e", [:mix], [{:ucwidth, "~> 0.2", [hex: :ucwidth, repo: "hexpm", optional: true]}], "hexpm", "59bf9d11ce37a4db98f57cb68fbfd61593bf419ec4ed302852b6683d3d2f7475"},
   "sourceror": {:hex, :sourceror, "1.10.1", "325753ed460fe9fa34ebb4deda76d57b2e1507dcd78a5eb9e1c41bfb78b7cdfe", [:mix], [], "hexpm", "288f3079d93865cd1e3e20df5b884ef2cb440e0e03e8ae393624ee8a770ba588"},
+  "ucwidth": {:hex, :ucwidth, "0.2.0", "1f0a440f541d895dff142275b96355f7e91e15bca525d4a0cc788ea51f0e3441", [:mix], [], "hexpm", "c1efd1798b8eeb11fb2bec3cafa3dd9c0c3647bee020543f0340b996177355bf"},
 }

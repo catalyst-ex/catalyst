@@ -47,7 +47,9 @@ defmodule Catalyst.MixProject do
   # Dependencies
   defp deps do
     [
-      {:sourceror, "~> 1.0"}
+      {:owl, "~> 0.12"},
+      {:sourceror, "~> 1.0"},
+      {:ucwidth, "~> 0.2"},
     ]
   end
 

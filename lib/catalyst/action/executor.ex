@@ -1,7 +1,6 @@
 defmodule Catalyst.Action.Executor do
-  require Logger
-
   alias Catalyst.Action
+  alias Catalyst.CLI
   alias Sourceror.Zipper
 
   @doc """
@@ -19,7 +18,7 @@ defmodule Catalyst.Action.Executor do
   def run(%Action.AddConfig{} = action), do: handle_add_config(action)
   # Fallback for unknown actions
   def run(action) do
-    Logger.warning("Unknown action encountered: #{inspect(action)}")
+    CLI.warn("Unknown action encountered: #{inspect(action)}")
     {:error, :unknown_action}
   end
 
@@ -31,20 +30,20 @@ defmodule Catalyst.Action.Executor do
     opts = [stderr_to_stdout: true, env: env]
     opts = if cd, do: Keyword.put(opts, :cd, cd), else: opts
 
-    Logger.info("Running: #{cmd} #{Enum.join(args, " ")}")
+    CLI.info("Running: #{cmd} #{Enum.join(args, " ")}")
 
     case System.cmd(cmd, args, opts) do
       {output, 0} ->
-        Logger.debug(output)
+        CLI.debug(output)
         :ok
 
       {error, code} ->
         if allow_nonzero_exit?(cmd, args, error) do
-          Logger.warning(
+          CLI.warn(
             "Command exited with code #{code} but was allowed: #{cmd} #{Enum.join(args, " ")}"
           )
 
-          Logger.debug(error)
+          CLI.debug(error)
           :ok
         else
           raise "Command failed with code #{code}:\n\n #{error}"
@@ -63,7 +62,7 @@ defmodule Catalyst.Action.Executor do
   end
 
   defp handle_add_file(%Action.AddFile{path: path, content: content}) do
-    Logger.info("Creating file: #{path}")
+    CLI.info("Creating file: #{path}")
 
     dir = Path.dirname(path)
     File.mkdir_p!(dir)
@@ -71,12 +70,12 @@ defmodule Catalyst.Action.Executor do
   end
 
   defp handle_append_file(%Action.AppendFile{path: path, content: content}) do
-    Logger.info("Appending to #{Path.basename(path)}")
+    CLI.info("Appending to #{Path.basename(path)}")
     File.write!(path, content, [:append])
   end
 
   defp handle_add_dependency(%Action.AddDependency{target_file: path} = action) do
-    Logger.info("Adding dependency: #{action.name}")
+    CLI.info("Adding dependency: #{action.name}")
 
     patch_mix_file(path, :deps, fn zipper ->
       dep_entry = build_dep_ast(action.name, action.version, action.opts)
@@ -85,7 +84,7 @@ defmodule Catalyst.Action.Executor do
       if zipper do
         Zipper.append_child(zipper, dep_entry)
       else
-        Logger.warning("Could not find 'deps' function in #{path}. Skipping.")
+        CLI.warn("Could not find 'deps' function in #{path}. Skipping.")
         # Return nil/original to skip safely
         zipper
       end
@@ -93,36 +92,36 @@ defmodule Catalyst.Action.Executor do
   end
 
   defp handle_add_alias(%Action.AddAlias{target_file: path} = action) do
-    Logger.info("Adding alias: #{action.key}")
+    CLI.info("Adding alias: #{action.key}")
 
     patch_mix_file(path, :aliases, fn list_zipper ->
       if list_zipper do
         upsert_alias_in_list(list_zipper, action.key, action.commands)
       else
-        Logger.warning("Could not find 'aliases' function in #{path}. Skipping.")
+        CLI.warn("Could not find 'aliases' function in #{path}. Skipping.")
         list_zipper
       end
     end)
   end
 
   defp handle_delete_file(%Action.DeleteFile{path: path}) do
-    Logger.info("Deleting file: #{path}")
+    CLI.info("Deleting file: #{path}")
     File.rm(path)
   end
 
   defp handle_move_file(%Action.MoveFile{from: from, to: to}) do
-    Logger.info("Moving file from #{from} to #{to}")
+    CLI.info("Moving file from #{from} to #{to}")
     File.mkdir_p!(Path.dirname(to))
     File.rename(from, to)
   end
 
   defp handle_function(%Action.Function{module: mod, function: fun, args: args}) do
-    Logger.info("Executing function: #{mod}.#{fun}(#{Enum.map_join(args, ", ", &inspect/1)})")
+    CLI.info("Executing function: #{mod}.#{fun}(#{Enum.map_join(args, ", ", &inspect/1)})")
     apply(mod, fun, args || [])
   end
 
   defp handle_add_config(%Action.AddConfig{target_file: path} = action) do
-    Logger.info(
+    CLI.info(
       "Configuring: #{inspect(action.app)} #{if action.module, do: inspect(action.module)}"
     )
 
@@ -133,7 +132,7 @@ defmodule Catalyst.Action.Executor do
 
     # Check if this exact config block already exists to prevent duplicates
     if config_exists?(zipper, action.app, action.module) do
-      Logger.info("   ↳ Config already exists, skipping.")
+      CLI.info("   ↳ Config already exists, skipping.")
     else
       new_ast = build_config_ast(action.app, action.module, action.opts)
 
@@ -200,7 +199,7 @@ defmodule Catalyst.Action.Executor do
       |> find_function_list(fun_name)
       |> case do
         nil ->
-          Logger.error("Failed to find function '#{fun_name}' in #{path}")
+          CLI.error("Failed to find function '#{fun_name}' in #{path}")
           # Return original source if we can't find the spot
           source
 
