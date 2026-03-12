@@ -82,7 +82,12 @@ defmodule Catalyst.Action.Executor do
 
       # Check if zipper is valid before appending
       if zipper do
-        Zipper.append_child(zipper, dep_entry)
+        if dependency_exists?(zipper, action.name) do
+          CLI.warn("Dependency #{action.name} already exists, skipping.")
+          zipper
+        else
+          Zipper.append_child(zipper, dep_entry)
+        end
       else
         CLI.warn("Could not find 'deps' function in #{path}. Skipping.")
         # Return nil/original to skip safely
@@ -275,6 +280,22 @@ defmodule Catalyst.Action.Executor do
       {:{}, [], [name, version, opts]}
     end
   end
+
+  defp dependency_exists?(deps_list_zipper, dep_name) do
+    deps_list_zipper
+    |> Zipper.node()
+    |> Enum.any?(&dependency_entry_matches?(&1, dep_name))
+  end
+
+  defp dependency_entry_matches?({:__block__, _, [entry]}, dep_name) do
+    dependency_entry_matches?(entry, dep_name)
+  end
+
+  defp dependency_entry_matches?({dep_name, _}, dep_name), do: true
+  defp dependency_entry_matches?({{:__block__, _, [dep_name]}, _}, dep_name), do: true
+  defp dependency_entry_matches?({:{}, _, [dep_name | _]}, dep_name), do: true
+  defp dependency_entry_matches?({:{}, _, [{:__block__, _, [dep_name]} | _]}, dep_name), do: true
+  defp dependency_entry_matches?(_entry, _dep_name), do: false
 
   defp build_alias_ast(key, cmds) do
     {key, cmds}
