@@ -1,0 +1,28 @@
+defmodule Catalyst.Action.AddConfigTest do
+  use ExUnit.Case, async: true
+
+  alias Catalyst.Action
+
+  test "AddConfig exposes expected keys" do
+    expected_keys = [:__struct__, :app, :module, :opts, :target_file] |> Enum.sort()
+    actual_keys = Action.AddConfig.__struct__() |> Map.keys() |> Enum.sort()
+
+    assert actual_keys == expected_keys
+  end
+
+  test "AddConfig can be instantiated" do
+    action =
+      struct(Action.AddConfig,
+        target_file: "config/config.exs",
+        app: :my_app,
+        module: MyApp.Repo,
+        opts: [url: "ecto://localhost/my_app"]
+      )
+
+    assert %Action.AddConfig{} = action
+    assert action.target_file == "config/config.exs"
+    assert action.app == :my_app
+    assert action.module == MyApp.Repo
+    assert action.opts == [url: "ecto://localhost/my_app"]
+  end
+end
