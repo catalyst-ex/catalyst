@@ -42,6 +42,48 @@ defmodule Catalyst.Action.AddAliasTest do
     assert mix_source =~ "quality: [\"format\", \"credo\"]"
   end
 
+  test "AddAlias does not duplicate commands under quality when applied twice" do
+    app_path = create_tmp_project!("add_alias_quality_no_dupe")
+    mix_exs = Path.join(app_path, "mix.exs")
+
+    action =
+      struct(Action.AddAlias,
+        key: :quality,
+        commands: ["format", "credo"],
+        target_file: mix_exs
+      )
+
+    Executor.run(action)
+    Executor.run(action)
+
+    mix_source = File.read!(mix_exs)
+
+    assert length(Regex.scan(~r/quality:\s*\[/, mix_source)) == 1
+    assert length(Regex.scan(~r/"format"/, mix_source)) == 1
+    assert length(Regex.scan(~r/"credo"/, mix_source)) == 1
+  end
+
+  test "AddAlias does not duplicate commands for other aliases" do
+    app_path = create_tmp_project!("add_alias_setup_no_dupe")
+    mix_exs = Path.join(app_path, "mix.exs")
+
+    action =
+      struct(Action.AddAlias,
+        key: :setup,
+        commands: ["deps.get", "compile"],
+        target_file: mix_exs
+      )
+
+    Executor.run(action)
+    Executor.run(action)
+
+    mix_source = File.read!(mix_exs)
+
+    assert length(Regex.scan(~r/setup:\s*\[/, mix_source)) == 1
+    assert length(Regex.scan(~r/"deps\.get"/, mix_source)) == 1
+    assert length(Regex.scan(~r/"compile"/, mix_source)) == 1
+  end
+
   defp create_tmp_project!(name) do
     base = Path.join(System.tmp_dir!(), "catalyst_tests")
     uniq = Integer.to_string(System.unique_integer([:positive, :monotonic]))
