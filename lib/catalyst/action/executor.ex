@@ -325,6 +325,7 @@ defmodule Catalyst.Action.Executor do
         cmds_to_add = Enum.reject(new_cmds, &(&1 in existing_cmds))
 
         if cmds_to_add == [] do
+          CLI.warn("Alias #{key} already contains requested commands, skipping.")
           list_zipper
         else
           inner_list_zipper =

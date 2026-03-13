@@ -4,9 +4,10 @@ defmodule Catalyst.Config.BuilderTest do
   alias Catalyst.Config
   alias Catalyst.Config.Builder
 
-  test "builds config from map and infers app defaults" do
+  test "builds config in :new mode and infers app defaults" do
     config =
       Builder.build!(%{
+        mode: :new,
         app: %{path: "my_app"},
         plugins: []
       })
@@ -16,6 +17,26 @@ defmodule Catalyst.Config.BuilderTest do
     assert config.app.path == "my_app"
     assert config.app.name == "my_app"
     assert config.app.module == "MyApp"
+    assert config.plugins == []
+  end
+
+  test "infers :existing mode when app path already exists" do
+    base = Path.join(System.tmp_dir!(), "catalyst_tests")
+    uniq = Integer.to_string(System.unique_integer([:positive, :monotonic]))
+    existing_path = Path.join(base, "existing_app_#{uniq}")
+
+    File.mkdir_p!(existing_path)
+    on_exit(fn -> File.rm_rf(existing_path) end)
+
+    config =
+      Builder.build!(%{
+        app: %{path: existing_path},
+        plugins: []
+      })
+
+    assert %Config{} = config
+    assert config.mode == :existing
+    assert config.app.path == existing_path
     assert config.plugins == []
   end
 

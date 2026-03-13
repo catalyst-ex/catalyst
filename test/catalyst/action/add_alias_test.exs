@@ -1,6 +1,8 @@
 defmodule Catalyst.Action.AddAliasTest do
   use ExUnit.Case, async: true
 
+  import ExUnit.CaptureIO
+
   alias Catalyst.Action
   alias Catalyst.Action.Executor
 
@@ -61,6 +63,28 @@ defmodule Catalyst.Action.AddAliasTest do
     assert length(Regex.scan(~r/quality:\s*\[/, mix_source)) == 1
     assert length(Regex.scan(~r/"format"/, mix_source)) == 1
     assert length(Regex.scan(~r/"credo"/, mix_source)) == 1
+  end
+
+  test "AddAlias warns and skips when requested commands already exist" do
+    app_path = create_tmp_project!("add_alias_warn_noop")
+    mix_exs = Path.join(app_path, "mix.exs")
+
+    action =
+      struct(Action.AddAlias,
+        key: :quality,
+        commands: ["format", "credo"],
+        target_file: mix_exs
+      )
+
+    Executor.run(action)
+
+    output =
+      capture_io(fn ->
+        Executor.run(action)
+      end)
+
+    assert output =~ "warn"
+    assert output =~ "Alias quality already contains requested commands, skipping."
   end
 
   test "AddAlias does not duplicate commands for other aliases" do
