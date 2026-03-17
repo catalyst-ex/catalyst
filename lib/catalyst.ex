@@ -3,8 +3,9 @@ defmodule Catalyst do
 
   def build(config) do
     {raw_actions, post_validations} =
-      Enum.reduce(config.plugins, {[], []}, fn {plugin_mod, opts},
-                                               {actions_acc, validations_acc} ->
+      Enum.reduce(config.plugins, {[], []}, fn plugin_spec, {actions_acc, validations_acc} ->
+        {plugin_mod, opts} = normalize_plugin_spec!(plugin_spec)
+
         full_opts =
           opts
           |> Keyword.merge(app_path: config.app.path)
@@ -26,6 +27,18 @@ defmodule Catalyst do
 
     execute_actions(struct_actions)
     run_post_validations(post_validations)
+  end
+
+  defp normalize_plugin_spec!({plugin_mod, opts}) when is_atom(plugin_mod) and is_list(opts),
+    do: {plugin_mod, opts}
+
+  defp normalize_plugin_spec!({plugin_mod}) when is_atom(plugin_mod), do: {plugin_mod, []}
+
+  defp normalize_plugin_spec!(plugin_mod) when is_atom(plugin_mod), do: {plugin_mod, []}
+
+  defp normalize_plugin_spec!(invalid) do
+    raise ArgumentError,
+          "Invalid plugin entry: #{inspect(invalid)}. Expected module, {module}, or {module, keyword_opts}."
   end
 
   defp execute_actions(actions) do
