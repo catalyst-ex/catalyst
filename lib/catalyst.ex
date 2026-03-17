@@ -1,6 +1,4 @@
 defmodule Catalyst do
-  alias Catalyst.{Action, Plugin}
-
   def build(config) do
     {raw_actions, post_validations} =
       Enum.reduce(config.plugins, {[], []}, fn plugin_spec, {actions_acc, validations_acc} ->
@@ -23,7 +21,7 @@ defmodule Catalyst do
         }
       end)
 
-    struct_actions = Plugin.normalize_actions(raw_actions)
+    struct_actions = Catalyst.Plugin.normalize_actions(raw_actions)
 
     execute_actions(struct_actions)
     run_post_validations(post_validations)
@@ -42,7 +40,7 @@ defmodule Catalyst do
   end
 
   defp execute_actions(actions) do
-    Enum.each(actions, &Action.Executor.run/1)
+    Enum.each(actions, &Catalyst.Actions.Executor.run/1)
   end
 
   defp run_post_validations(validations) do

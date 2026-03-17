@@ -1,8 +1,8 @@
 defmodule Catalyst.Plugin.MailerTest do
   use ExUnit.Case, async: false
 
-  alias Catalyst.Action
-  alias Catalyst.Action.Executor
+  alias Catalyst.Actions
+  alias Catalyst.Actions.Executor
   alias Catalyst.Plugin
   alias Catalyst.Plugin.Mailer
 
@@ -18,7 +18,7 @@ defmodule Catalyst.Plugin.MailerTest do
 
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
-        %Action.SystemCommand{} -> :ok
+        %Actions.SystemCommand{} -> :ok
         action -> Executor.run(action)
       end)
     end)
@@ -34,8 +34,8 @@ defmodule Catalyst.Plugin.MailerTest do
     assert mailer_source =~ "defmodule Elixir.MyApp.Mailer do"
     assert mailer_source =~ "use Swoosh.Mailer, otp_app: :my_app"
 
-    assert %Action.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
-             Enum.find(actions, &match?(%Action.SystemCommand{}, &1))
+    assert %Actions.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
+             Enum.find(actions, &match?(%Actions.SystemCommand{}, &1))
   end
 
   test "post_validate returns a valid callback result when explicitly implemented" do

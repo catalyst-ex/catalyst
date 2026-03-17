@@ -1,27 +1,27 @@
-defmodule Catalyst.Action.AddAliasTest do
+defmodule Catalyst.Actions.AddAliasTest do
   use ExUnit.Case, async: true
 
   import ExUnit.CaptureIO
 
-  alias Catalyst.Action
-  alias Catalyst.Action.Executor
+  alias Catalyst.Actions
+  alias Catalyst.Actions.Executor
 
   test "AddAlias exposes expected keys" do
     expected_keys = [:__struct__, :commands, :key, :target_file] |> Enum.sort()
-    actual_keys = Action.AddAlias.__struct__() |> Map.keys() |> Enum.sort()
+    actual_keys = Actions.AddAlias.__struct__() |> Map.keys() |> Enum.sort()
 
     assert actual_keys == expected_keys
   end
 
   test "AddAlias can be instantiated" do
     action =
-      struct(Action.AddAlias,
+      struct(Actions.AddAlias,
         key: :setup,
         commands: ["deps.get", "compile"],
         target_file: "mix.exs"
       )
 
-    assert %Action.AddAlias{} = action
+    assert %Actions.AddAlias{} = action
     assert action.key == :setup
     assert action.commands == ["deps.get", "compile"]
     assert action.target_file == "mix.exs"
@@ -32,7 +32,7 @@ defmodule Catalyst.Action.AddAliasTest do
     mix_exs = Path.join(app_path, "mix.exs")
 
     action =
-      struct(Action.AddAlias,
+      struct(Actions.AddAlias,
         key: :quality,
         commands: ["format", "credo"],
         target_file: mix_exs
@@ -49,7 +49,7 @@ defmodule Catalyst.Action.AddAliasTest do
     mix_exs = Path.join(app_path, "mix.exs")
 
     action =
-      struct(Action.AddAlias,
+      struct(Actions.AddAlias,
         key: :quality,
         commands: ["format", "credo"],
         target_file: mix_exs
@@ -70,7 +70,7 @@ defmodule Catalyst.Action.AddAliasTest do
     mix_exs = Path.join(app_path, "mix.exs")
 
     action =
-      struct(Action.AddAlias,
+      struct(Actions.AddAlias,
         key: :quality,
         commands: ["format", "credo"],
         target_file: mix_exs
@@ -92,7 +92,7 @@ defmodule Catalyst.Action.AddAliasTest do
     mix_exs = Path.join(app_path, "mix.exs")
 
     action =
-      struct(Action.AddAlias,
+      struct(Actions.AddAlias,
         key: :setup,
         commands: ["deps.get", "compile"],
         target_file: mix_exs

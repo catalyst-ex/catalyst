@@ -1,24 +1,24 @@
-defmodule Catalyst.Action.MixTaskTest do
+defmodule Catalyst.Actions.MixTaskTest do
   use ExUnit.Case, async: true
 
-  alias Catalyst.Action
+  alias Catalyst.Actions
 
   test "MixTask exposes expected keys" do
     expected_keys = [:__struct__, :args, :env, :name] |> Enum.sort()
-    actual_keys = Action.MixTask.__struct__() |> Map.keys() |> Enum.sort()
+    actual_keys = Actions.MixTask.__struct__() |> Map.keys() |> Enum.sort()
 
     assert actual_keys == expected_keys
   end
 
   test "MixTask can be instantiated" do
     action =
-      struct(Action.MixTask,
+      struct(Actions.MixTask,
         name: "deps.get",
         args: ["--only", "test"],
         env: [{"MIX_ENV", "test"}]
       )
 
-    assert %Action.MixTask{} = action
+    assert %Actions.MixTask{} = action
     assert action.name == "deps.get"
     assert action.args == ["--only", "test"]
     assert action.env == [{"MIX_ENV", "test"}]

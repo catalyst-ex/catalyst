@@ -6,22 +6,22 @@ defmodule Catalyst.Plugin.Credo do
     mix_file = Path.join(opts[:app_path], "mix.exs")
 
     [
-      %Action.AddDependency{
+      %Actions.AddDependency{
         name: :credo,
         version: "~> 1.7",
         opts: [only: [:dev, :test], runtime: false],
         target_file: mix_file
       },
-      %Action.AddAlias{
+      %Actions.AddAlias{
         key: :quality,
         commands: ["format", "credo"],
         target_file: mix_file
       },
-      %Action.AddFile{
+      %Actions.AddFile{
         path: Path.join(opts[:app_path], ".credo.exs"),
         content: read_template!(".credo.exs")
       },
-      %Action.SystemCommand{
+      %Actions.SystemCommand{
         cmd: "mix",
         args: ["deps.get"],
         cd: opts[:app_path]
@@ -33,7 +33,7 @@ defmodule Catalyst.Plugin.Credo do
   def post_validate(opts) do
     app_path = opts[:app_path]
 
-    command = %Action.SystemCommand{cmd: "mix", args: ["credo"], cd: app_path}
+    command = %Actions.SystemCommand{cmd: "mix", args: ["credo"], cd: app_path}
     Catalyst.Plugin.run_system_command(command)
   end
 

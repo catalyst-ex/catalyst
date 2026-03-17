@@ -7,23 +7,23 @@ defmodule Catalyst.Plugin.Sobelow do
     mix_file = Path.join(opts[:app_path], "mix.exs")
 
     [
-      %Action.AddDependency{
+      %Actions.AddDependency{
         name: :sobelow,
         version: "0.14.0",
         opts: [only: [:dev, :test], runtime: false],
         target_file: mix_file
       },
-      %Action.AddAlias{
+      %Actions.AddAlias{
         key: :quality,
         commands: ["format", "sobelow --exit low"],
         target_file: mix_file
       },
-      %Action.SystemCommand{
+      %Actions.SystemCommand{
         cmd: "mix",
         args: ["deps.get"],
         cd: opts[:app_path]
       },
-      %Action.AppendFile{
+      %Actions.AppendFile{
         path: Path.join(opts[:app_path], ".gitignore"),
         content: "\n# Sobelow Security Logs\n.sobelow"
       }
@@ -35,7 +35,7 @@ defmodule Catalyst.Plugin.Sobelow do
     app_path = opts[:app_path]
     strict? = Keyword.get(opts, :strict_post_validate, false)
 
-    command = %Action.SystemCommand{cmd: "mix", args: ["sobelow", "--exit", "low"], cd: app_path}
+    command = %Actions.SystemCommand{cmd: "mix", args: ["sobelow", "--exit", "low"], cd: app_path}
 
     case Catalyst.Plugin.run_system_command(command) do
       :ok ->

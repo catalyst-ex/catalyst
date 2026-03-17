@@ -1,7 +1,7 @@
 defmodule Catalyst.Plugin.PhoenixBaseTest do
   use ExUnit.Case, async: true
 
-  alias Catalyst.Action
+  alias Catalyst.Actions
   alias Catalyst.Plugin.PhoenixBase
 
   test "converts keyword flags to phx.new argv" do
@@ -23,7 +23,7 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
 
     actions = PhoenixBase.run(opts)
 
-    assert %Action.SystemCommand{cmd: "mix", args: args} = Enum.at(actions, 0)
+    assert %Actions.SystemCommand{cmd: "mix", args: args} = Enum.at(actions, 0)
 
     assert args == [
              "phx.new",
@@ -50,7 +50,7 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
 
     actions = PhoenixBase.run(opts)
 
-    assert %Action.SystemCommand{args: ["phx.new", "my_app" | flags]} = Enum.at(actions, 0)
+    assert %Actions.SystemCommand{args: ["phx.new", "my_app" | flags]} = Enum.at(actions, 0)
     assert flags == ["--no-install", "--no-ecto", "--module", "MyApp"]
   end
 
@@ -63,7 +63,7 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
 
     actions = PhoenixBase.run(opts)
 
-    assert %Action.SystemCommand{args: args} = Enum.at(actions, 0)
+    assert %Actions.SystemCommand{args: args} = Enum.at(actions, 0)
     assert args == ["phx.new", "my_app", "--install", "--ecto"]
   end
 

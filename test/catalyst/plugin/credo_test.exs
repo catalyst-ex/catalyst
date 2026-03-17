@@ -1,8 +1,8 @@
 defmodule Catalyst.Plugin.CredoTest do
   use ExUnit.Case, async: true
 
-  alias Catalyst.Action
-  alias Catalyst.Action.Executor
+  alias Catalyst.Actions
+  alias Catalyst.Actions.Executor
   alias Catalyst.Plugin
   alias Catalyst.Plugin.Credo
 
@@ -15,7 +15,7 @@ defmodule Catalyst.Plugin.CredoTest do
       |> Plugin.normalize_actions()
 
     Enum.each(actions, fn
-      %Action.SystemCommand{} -> :ok
+      %Actions.SystemCommand{} -> :ok
       action -> Executor.run(action)
     end)
 
@@ -26,8 +26,8 @@ defmodule Catalyst.Plugin.CredoTest do
     assert mix_source =~ "{:credo, \"~> 1.7\", only: [:dev, :test], runtime: false}"
     assert mix_source =~ "quality: [\"format\", \"credo\"]"
 
-    assert %Action.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
-             Enum.find(actions, &match?(%Action.SystemCommand{}, &1))
+    assert %Actions.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
+             Enum.find(actions, &match?(%Actions.SystemCommand{}, &1))
   end
 
   defp create_tmp_project!(name) do

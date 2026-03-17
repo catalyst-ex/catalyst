@@ -1,6 +1,6 @@
 defmodule Catalyst.Plugin.GithubCI do
   use Catalyst.Plugin
-  alias Catalyst.Action
+  alias Catalyst.Actions, as: Action
 
   @impl true
   def run(opts) do

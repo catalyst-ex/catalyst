@@ -1,15 +1,15 @@
 defmodule Catalyst.Plugin do
-  alias Catalyst.Action
+  alias Catalyst.Actions
 
   @callback init(opts :: keyword(), config :: map()) :: {:ok, keyword()} | {:error, term()}
-  @callback run(opts :: keyword()) :: [Catalyst.Action.t() | {module(), keyword()}]
+  @callback run(opts :: keyword()) :: [Catalyst.Actions.t() | {module(), keyword()}]
   @callback post_validate(opts :: keyword()) :: :ok | {:error, term()}
 
   defmacro __using__(_) do
     quote do
       @behaviour Catalyst.Plugin
       # Allows generic usage of Action modules
-      alias Catalyst.Action
+      alias Catalyst.Actions
 
       def init(opts, _), do: {:ok, opts}
       def post_validate(_), do: :ok
@@ -25,7 +25,7 @@ defmodule Catalyst.Plugin do
       %{__struct__: _} = action ->
         action
 
-      # If it's a tuple {Action.SystemCommand, [cmd: "echo"]}, convert to struct
+      # If it's a tuple {Actions.SystemCommand, [cmd: "echo"]}, convert to struct
       {mod, opts} when is_atom(mod) and is_list(opts) ->
         struct!(mod, opts)
     end)
@@ -34,9 +34,9 @@ defmodule Catalyst.Plugin do
   @doc """
   Executes a system command action through the action executor.
   """
-  def run_system_command(%Action.SystemCommand{} = command) do
+  def run_system_command(%Actions.SystemCommand{} = command) do
     try do
-      Catalyst.Action.Executor.run(command)
+      Catalyst.Actions.Executor.run(command)
       :ok
     rescue
       error -> {:error, Exception.message(error)}

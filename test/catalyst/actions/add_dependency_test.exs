@@ -1,26 +1,26 @@
-defmodule Catalyst.Action.AddDependencyTest do
+defmodule Catalyst.Actions.AddDependencyTest do
   use ExUnit.Case, async: true
 
-  alias Catalyst.Action
-  alias Catalyst.Action.Executor
+  alias Catalyst.Actions
+  alias Catalyst.Actions.Executor
 
   test "AddDependency exposes expected keys" do
     expected_keys = [:__struct__, :name, :opts, :target_file, :version] |> Enum.sort()
-    actual_keys = Action.AddDependency.__struct__() |> Map.keys() |> Enum.sort()
+    actual_keys = Actions.AddDependency.__struct__() |> Map.keys() |> Enum.sort()
 
     assert actual_keys == expected_keys
   end
 
   test "AddDependency can be instantiated" do
     action =
-      struct(Action.AddDependency,
+      struct(Actions.AddDependency,
         name: :plug,
         version: "~> 1.0",
         target_file: "mix.exs",
         opts: [only: :dev]
       )
 
-    assert %Action.AddDependency{} = action
+    assert %Actions.AddDependency{} = action
     assert action.name == :plug
     assert action.version == "~> 1.0"
     assert action.target_file == "mix.exs"
@@ -32,7 +32,7 @@ defmodule Catalyst.Action.AddDependencyTest do
     mix_exs = Path.join(app_path, "mix.exs")
 
     action =
-      struct(Action.AddDependency,
+      struct(Actions.AddDependency,
         name: :plug,
         version: "~> 1.0",
         target_file: mix_exs,
@@ -52,7 +52,7 @@ defmodule Catalyst.Action.AddDependencyTest do
     mix_exs = Path.join(app_path, "mix.exs")
 
     action =
-      struct(Action.AddDependency,
+      struct(Actions.AddDependency,
         name: :plug,
         version: "~> 1.0",
         target_file: mix_exs,
