@@ -9,7 +9,7 @@ defmodule Catalyst.Plugin.Credo do
       %Action.AddDependency{
         name: :credo,
         version: "~> 1.7",
-        opts: opts[:flags],
+        opts: [only: [:dev, :test], runtime: false],
         target_file: mix_file
       },
       %Action.AddAlias{

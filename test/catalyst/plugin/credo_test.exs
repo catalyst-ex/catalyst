@@ -10,7 +10,7 @@ defmodule Catalyst.Plugin.CredoTest do
     app_path = create_tmp_project!("credo_app")
 
     actions =
-      [app_path: app_path, flags: []]
+      [app_path: app_path]
       |> Credo.run()
       |> Plugin.normalize_actions()
 
@@ -23,7 +23,7 @@ defmodule Catalyst.Plugin.CredoTest do
     mix_source = File.read!(mix_exs)
 
     assert File.exists?(Path.join(app_path, ".credo.exs"))
-    assert mix_source =~ "credo: \"~> 1.7\""
+    assert mix_source =~ "{:credo, \"~> 1.7\", only: [:dev, :test], runtime: false}"
     assert mix_source =~ "quality: [\"format\", \"credo\"]"
 
     assert %Action.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =

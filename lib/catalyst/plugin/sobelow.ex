@@ -10,7 +10,7 @@ defmodule Catalyst.Plugin.Sobelow do
       %Action.AddDependency{
         name: :sobelow,
         version: "0.14.0",
-        opts: opts[:flags],
+        opts: [only: [:dev, :test], runtime: false],
         target_file: mix_file
       },
       %Action.AddAlias{

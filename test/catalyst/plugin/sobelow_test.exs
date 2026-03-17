@@ -12,7 +12,7 @@ defmodule Catalyst.Plugin.SobelowTest do
     File.write!(gitignore, "_build\n")
 
     actions =
-      [app_path: app_path, flags: []]
+      [app_path: app_path]
       |> Sobelow.run()
       |> Plugin.normalize_actions()
 
@@ -24,7 +24,7 @@ defmodule Catalyst.Plugin.SobelowTest do
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
 
-    assert mix_source =~ "sobelow: \"0.14.0\""
+    assert mix_source =~ "{:sobelow, \"0.14.0\", only: [:dev, :test], runtime: false}"
     assert mix_source =~ "quality: [\"format\", \"sobelow --exit low\"]"
 
     gitignore_source = File.read!(gitignore)
