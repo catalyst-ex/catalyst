@@ -4,13 +4,6 @@ defmodule Catalyst.Actions.AddDependency do
 
   defstruct [:name, :version, :target_file, :opts]
 
-  @type t :: %__MODULE__{
-          name: atom() | binary() | nil,
-          version: binary() | nil,
-          target_file: Path.t() | nil,
-          opts: keyword() | nil
-        }
-
   def execute(%__MODULE__{target_file: path} = action) do
     CLI.info("Adding dependency: #{action.name}")
 

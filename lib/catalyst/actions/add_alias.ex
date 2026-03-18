@@ -4,12 +4,6 @@ defmodule Catalyst.Actions.AddAlias do
 
   defstruct [:key, :commands, :target_file]
 
-  @type t :: %__MODULE__{
-          key: atom() | binary() | nil,
-          commands: [binary()] | nil,
-          target_file: Path.t() | nil
-        }
-
   def execute(%__MODULE__{target_file: path} = action) do
     CLI.info("Adding alias: #{action.key}")
 

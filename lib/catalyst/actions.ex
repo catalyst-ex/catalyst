@@ -7,15 +7,15 @@ defmodule Catalyst.Actions do
   """
 
   @type t ::
-          Catalyst.Actions.SystemCommand.t()
-          | Catalyst.Actions.AddFile.t()
-          | Catalyst.Actions.PatchFile.t()
-          | Catalyst.Actions.AddDependency.t()
-          | Catalyst.Actions.MixTask.t()
-          | Catalyst.Actions.AppendFile.t()
-          | Catalyst.Actions.AddAlias.t()
-          | Catalyst.Actions.MoveFile.t()
-          | Catalyst.Actions.DeleteFile.t()
-          | Catalyst.Actions.Function.t()
-          | Catalyst.Actions.AddConfig.t()
+          %Catalyst.Actions.SystemCommand{}
+          | %Catalyst.Actions.AddFile{}
+          | %Catalyst.Actions.PatchFile{}
+          | %Catalyst.Actions.AddDependency{}
+          | %Catalyst.Actions.MixTask{}
+          | %Catalyst.Actions.AppendFile{}
+          | %Catalyst.Actions.AddAlias{}
+          | %Catalyst.Actions.MoveFile{}
+          | %Catalyst.Actions.DeleteFile{}
+          | %Catalyst.Actions.Function{}
+          | %Catalyst.Actions.AddConfig{}
 end

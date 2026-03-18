@@ -3,13 +3,6 @@ defmodule Catalyst.Actions.AddConfig do
 
   defstruct [:target_file, :app, :module, :opts]
 
-  @type t :: %__MODULE__{
-          target_file: Path.t() | nil,
-          app: atom() | nil,
-          module: module() | nil,
-          opts: keyword() | nil
-        }
-
   def execute(%__MODULE__{target_file: path} = action) do
     CLI.info(
       "Configuring: #{inspect(action.app)} #{if action.module, do: inspect(action.module)}"

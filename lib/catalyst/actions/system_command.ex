@@ -3,13 +3,6 @@ defmodule Catalyst.Actions.SystemCommand do
 
   defstruct [:cmd, :args, :env, :cd]
 
-  @type t :: %__MODULE__{
-          cmd: binary() | nil,
-          args: [binary()] | nil,
-          env: [{binary(), binary()}] | keyword(binary()) | nil,
-          cd: Path.t() | nil
-        }
-
   def execute(%__MODULE__{cmd: cmd, args: args, env: env, cd: cd}) do
     args = args || []
     env = env || []
