@@ -25,6 +25,7 @@ defmodule Catalyst.MixProject do
       description: description(),
       package: package(),
       deps: deps(),
+      aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
 
       # ExDoc
@@ -49,7 +50,16 @@ defmodule Catalyst.MixProject do
     [
       {:owl, "~> 0.12"},
       {:sourceror, "~> 1.0"},
-      {:ucwidth, "~> 0.2"}
+      {:ucwidth, "~> 0.2"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false}
+    ]
+  end
+
+  # Mix Aliases
+  defp aliases do
+    [
+      quality: ["format", "credo", "sobelow --exit low"]
     ]
   end
 
