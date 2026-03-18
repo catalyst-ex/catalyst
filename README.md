@@ -29,8 +29,11 @@ catalyst/
 │   ├── catalyst/
 │   │   ├── config.ex               # Configuration Structs
 │   │   ├── plugin.ex               # Plugin Behaviour
-│   │   ├── action.ex               # Action Struct Definitions
-│   │   ├── action/
+│   │   ├── actions.ex              # Actions Type Contract
+│   │   ├── actions/
+│   │   │   ├── add_file.ex         # Action Struct
+│   │   │   ├── add_dependency.ex   # Action Struct
+│   │   │   ├── system_command.ex   # Action Struct
 │   │   │   └── executor.ex         # Side-effect Runner
 │   │   └── plugin/
 │   │       └── phoenix_base.ex     # Core Generator Plugin 
@@ -72,8 +75,8 @@ alias Catalyst.Plugin
 		{Plugin.PhoenixBase,
 		 phoenix: "1.18.4",
 		 flags: [install: false, ecto: false, mailer: false]},
-		{Plugin.Credo, flags: [only: [:dev, :test], runtime: false]},
-		{Plugin.Sobelow, flags: [only: [:dev, :test], runtime: false], strict_post_validate: false}
+		{Plugin.Credo},
+		{Plugin.Sobelow, strict_post_validate: false}
 	]
 }
 ```
@@ -91,8 +94,8 @@ alias Catalyst.Plugin
 		path: "."
 	},
 	plugins: [
-		{Plugin.Credo, flags: [only: [:dev, :test], runtime: false]},
-		{Plugin.Sobelow, flags: [only: [:dev, :test], runtime: false], strict_post_validate: false}
+		{Plugin.Credo},
+		{Plugin.Sobelow, strict_post_validate: false}
 	]
 }
 ```
