@@ -1,4 +1,4 @@
-defmodule Catalyst.Plugin.PhoenixBase do
+defmodule Catalyst.Plugins.PhoenixBase do
   use Catalyst.Plugin
 
   @impl true

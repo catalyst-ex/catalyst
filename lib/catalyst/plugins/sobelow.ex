@@ -1,4 +1,4 @@
-defmodule Catalyst.Plugin.Sobelow do
+defmodule Catalyst.Plugins.Sobelow do
   use Catalyst.Plugin
   alias Catalyst.CLI
 

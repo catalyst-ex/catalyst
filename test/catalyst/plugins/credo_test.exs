@@ -1,37 +1,31 @@
-defmodule Catalyst.Plugin.SobelowTest do
+defmodule Catalyst.Plugins.CredoTest do
   use ExUnit.Case, async: true
 
   alias Catalyst.Actions
-  alias Catalyst.Actions.Executor
   alias Catalyst.Execution
   alias Catalyst.Plugin
-  alias Catalyst.Plugin.Sobelow
+  alias Catalyst.Plugins.Credo
 
-  test "applies sobelow plugin actions end to end" do
-    app_path = create_tmp_project!("sobelow_app")
+  test "applies credo plugin actions end to end" do
+    app_path = create_tmp_project!("credo_app")
     execution = Execution.new(app_path: app_path)
-    gitignore = Path.join(app_path, ".gitignore")
-    File.write!(gitignore, "_build\n")
 
     actions =
       execution
-      |> Sobelow.run()
+      |> Credo.run()
       |> Plugin.normalize_actions()
 
     Enum.each(actions, fn
       %Actions.MixTask{} -> :ok
-      action -> Executor.run(action, execution)
+      action -> Actions.Executor.run(action, execution)
     end)
 
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
 
-    assert mix_source =~ "{:sobelow, \"0.14.0\", only: [:dev, :test], runtime: false}"
-    assert mix_source =~ "quality: [\"format\", \"sobelow --exit low\"]"
-
-    gitignore_source = File.read!(gitignore)
-    assert gitignore_source =~ "# Sobelow Security Logs"
-    assert gitignore_source =~ ".sobelow"
+    assert File.exists?(Path.join(app_path, ".credo.exs"))
+    assert mix_source =~ "{:credo, \"~> 1.7\", only: [:dev, :test], runtime: false}"
+    assert mix_source =~ "quality: [\"format\", \"credo\"]"
 
     assert %Actions.MixTask{name: "deps.get"} =
              Enum.find(actions, &match?(%Actions.MixTask{}, &1))

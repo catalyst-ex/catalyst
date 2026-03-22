@@ -1,11 +1,10 @@
-defmodule Catalyst.Plugin.MailerTest do
+defmodule Catalyst.Plugins.MailerTest do
   use ExUnit.Case, async: false
 
   alias Catalyst.Actions
-  alias Catalyst.Actions.Executor
   alias Catalyst.Execution
   alias Catalyst.Plugin
-  alias Catalyst.Plugin.Mailer
+  alias Catalyst.Plugins.Mailer
 
   test "applies mailer plugin actions end to end" do
     {tmp_root, app_path, app_root} = create_tmp_project!("mailer_app")
@@ -27,7 +26,7 @@ defmodule Catalyst.Plugin.MailerTest do
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
         %Actions.MixTask{} -> :ok
-        action -> Executor.run(action, execution)
+        action -> Actions.Executor.run(action, execution)
       end)
     end)
 
@@ -66,7 +65,7 @@ defmodule Catalyst.Plugin.MailerTest do
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
         %Actions.MixTask{} -> :ok
-        action -> Executor.run(action, execution)
+        action -> Actions.Executor.run(action, execution)
       end)
     end)
 
@@ -142,7 +141,7 @@ defmodule Catalyst.Plugin.MailerTest do
   end
 
   defp mailer_has_explicit_post_validate? do
-    plugin_file = Path.expand("lib/catalyst/plugin/mailer.ex", File.cwd!())
+    plugin_file = Path.expand("lib/catalyst/plugins/mailer.ex", File.cwd!())
 
     plugin_file
     |> File.read!()

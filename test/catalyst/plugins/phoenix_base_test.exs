@@ -1,9 +1,9 @@
-defmodule Catalyst.Plugin.PhoenixBaseTest do
+defmodule Catalyst.Plugins.PhoenixBaseTest do
   use ExUnit.Case, async: true
 
   alias Catalyst.Actions
   alias Catalyst.Execution
-  alias Catalyst.Plugin.PhoenixBase
+  alias Catalyst.Plugins.PhoenixBase
 
   test "converts keyword flags to phx.new argv" do
     execution = Execution.new(app_path: "my_app", app_name: "My App")

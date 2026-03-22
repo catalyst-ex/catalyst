@@ -1,4 +1,4 @@
-defmodule Catalyst.Plugin.ElixirBase do
+defmodule Catalyst.Plugins.ElixirBase do
   use Catalyst.Plugin
 
   @impl true

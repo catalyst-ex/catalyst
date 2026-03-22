@@ -1,4 +1,4 @@
-defmodule Catalyst.Plugin.Mailer do
+defmodule Catalyst.Plugins.Mailer do
   use Catalyst.Plugin
   alias Catalyst.Execution
 

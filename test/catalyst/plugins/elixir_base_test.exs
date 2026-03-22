@@ -1,6 +1,6 @@
-defmodule Catalyst.Plugin.ElixirBaseTest do
+defmodule Catalyst.Plugins.ElixirBaseTest do
   use ExUnit.Case, async: true
-  alias Catalyst.Plugin.ElixirBase
+  alias Catalyst.Plugins.ElixirBase
   alias Catalyst.Actions
   alias Catalyst.Execution
 

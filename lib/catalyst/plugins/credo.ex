@@ -1,4 +1,4 @@
-defmodule Catalyst.Plugin.Credo do
+defmodule Catalyst.Plugins.Credo do
   use Catalyst.Plugin
 
   @impl true

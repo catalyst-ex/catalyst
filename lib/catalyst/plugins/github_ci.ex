@@ -1,4 +1,4 @@
-defmodule Catalyst.Plugin.GithubCI do
+defmodule Catalyst.Plugins.GithubCI do
   use Catalyst.Plugin
   alias Catalyst.Actions, as: Action
 
