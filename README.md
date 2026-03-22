@@ -61,7 +61,7 @@ Example (`mode: :new`):
 
 ```elixir
 alias Catalyst.Config
-alias Catalyst.Plugin
+alias Catalyst.Plugins
 
 %Config{
 	version: 1,
@@ -72,11 +72,11 @@ alias Catalyst.Plugin
 		module: "MyApp"
 	},
 	plugins: [
-		{Plugin.PhoenixBase,
+		{Plugins.PhoenixBase,
 		 phoenix: "1.18.4",
 		 flags: [install: false, ecto: false, mailer: false]},
-		{Plugin.Credo},
-		{Plugin.Sobelow, strict_post_validate: false}
+		{Plugins.Credo},
+		{Plugins.Sobelow, strict_post_validate: false}
 	]
 }
 ```
@@ -85,7 +85,7 @@ Example (`mode: :existing`):
 
 ```elixir
 alias Catalyst.Config
-alias Catalyst.Plugin
+alias Catalyst.Plugins
 
 %Config{
 	version: 1,
@@ -94,8 +94,8 @@ alias Catalyst.Plugin
 		path: "."
 	},
 	plugins: [
-		{Plugin.Credo},
-		{Plugin.Sobelow, strict_post_validate: false}
+		{Plugins.Credo},
+		{Plugins.Sobelow, strict_post_validate: false}
 	]
 }
 ```
