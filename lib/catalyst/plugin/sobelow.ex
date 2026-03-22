@@ -3,41 +3,32 @@ defmodule Catalyst.Plugin.Sobelow do
   alias Catalyst.CLI
 
   @impl true
-  def run(opts) do
-    mix_file = Path.join(opts[:app_path], "mix.exs")
-
+  def run(_execution, _opts \\ []) do
     [
       %Actions.AddDependency{
         name: :sobelow,
         version: "0.14.0",
-        opts: [only: [:dev, :test], runtime: false],
-        target_file: mix_file
+        opts: [only: [:dev, :test], runtime: false]
       },
       %Actions.AddAlias{
         key: :quality,
-        commands: ["format", "sobelow --exit low"],
-        target_file: mix_file
+        commands: ["format", "sobelow --exit low"]
       },
-      %Actions.SystemCommand{
-        cmd: "mix",
-        args: ["deps.get"],
-        cd: opts[:app_path]
-      },
+      %Actions.MixTask{name: "deps.get"},
       %Actions.AppendFile{
-        path: Path.join(opts[:app_path], ".gitignore"),
+        path: ".gitignore",
         content: "\n# Sobelow Security Logs\n.sobelow"
       }
     ]
   end
 
   @impl true
-  def post_validate(opts) do
-    app_path = opts[:app_path]
+  def post_validate(execution, opts) do
     strict? = Keyword.get(opts, :strict_post_validate, false)
 
-    command = %Actions.SystemCommand{cmd: "mix", args: ["sobelow", "--exit", "low"], cd: app_path}
+    task = %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]}
 
-    case Catalyst.Plugin.run_system_command(command) do
+    case Catalyst.Plugin.run_mix_task(task, execution) do
       :ok ->
         :ok
 

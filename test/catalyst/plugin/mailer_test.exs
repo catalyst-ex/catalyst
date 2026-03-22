@@ -3,6 +3,7 @@ defmodule Catalyst.Plugin.MailerTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Execution
   alias Catalyst.Plugin
   alias Catalyst.Plugin.Mailer
 
@@ -11,15 +12,22 @@ defmodule Catalyst.Plugin.MailerTest do
 
     actions =
       File.cd!(tmp_root, fn ->
-        [app_path: app_path, app_module: "MyApp"]
+        Execution.new(
+          app_path: app_path,
+          app_name: app_path,
+          app_module: "MyApp",
+          otp_app: :my_app
+        )
         |> Mailer.run()
         |> Plugin.normalize_actions()
       end)
 
+    execution = Execution.new(app_path: app_path, otp_app: :my_app)
+
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
-        %Actions.SystemCommand{} -> :ok
-        action -> Executor.run(action)
+        %Actions.MixTask{} -> :ok
+        action -> Executor.run(action, execution)
       end)
     end)
 
@@ -34,8 +42,41 @@ defmodule Catalyst.Plugin.MailerTest do
     assert mailer_source =~ "defmodule Elixir.MyApp.Mailer do"
     assert mailer_source =~ "use Swoosh.Mailer, otp_app: :my_app"
 
-    assert %Actions.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
-             Enum.find(actions, &match?(%Actions.SystemCommand{}, &1))
+    assert %Actions.MixTask{name: "deps.get"} =
+             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+  end
+
+  test "uses normalized OTP app when display app_name has spaces" do
+    {tmp_root, app_path, app_root} = create_tmp_project!("mailer_display_name")
+
+    actions =
+      File.cd!(tmp_root, fn ->
+        Execution.new(
+          app_path: app_path,
+          app_name: "My App",
+          app_module: "MyApp",
+          otp_app: :my_app
+        )
+        |> Mailer.run()
+        |> Plugin.normalize_actions()
+      end)
+
+    execution = Execution.new(app_path: app_path, app_name: "My App", otp_app: :my_app)
+
+    File.cd!(tmp_root, fn ->
+      Enum.each(actions, fn
+        %Actions.MixTask{} -> :ok
+        action -> Executor.run(action, execution)
+      end)
+    end)
+
+    config_source = File.read!(Path.join(app_root, "config/config.exs"))
+    mailer_path = Path.join(app_root, "lib/my_app/mailer.ex")
+
+    assert config_source =~ "config(:my_app, MyApp.Mailer"
+    refute config_source =~ "config(:\"My App\", MyApp.Mailer"
+    assert File.exists?(mailer_path)
+    refute File.exists?(Path.join(app_root, "lib/My App/mailer.ex"))
   end
 
   test "post_validate returns a valid callback result when explicitly implemented" do
@@ -44,7 +85,7 @@ defmodule Catalyst.Plugin.MailerTest do
 
       result =
         File.cd!(tmp_root, fn ->
-          Mailer.post_validate(app_path: app_path, app_module: "MyApp")
+          Mailer.post_validate(Execution.new(app_path: app_path, app_module: "MyApp"), [])
         end)
 
       assert result == :ok or match?({:error, _}, result)

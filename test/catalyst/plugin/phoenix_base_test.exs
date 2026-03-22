@@ -2,12 +2,13 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
   use ExUnit.Case, async: true
 
   alias Catalyst.Actions
+  alias Catalyst.Execution
   alias Catalyst.Plugin.PhoenixBase
 
   test "converts keyword flags to phx.new argv" do
+    execution = Execution.new(app_path: "my_app", app_name: "My App")
+
     opts = [
-      app_path: "my_app",
-      app_name: "My App",
       flags: [
         install: false,
         umbrella: true,
@@ -21,12 +22,11 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
       ]
     ]
 
-    actions = PhoenixBase.run(opts)
+    actions = PhoenixBase.run(execution, opts)
 
-    assert %Actions.SystemCommand{cmd: "mix", args: args} = Enum.at(actions, 0)
+    assert %Actions.MixTask{name: "phx.new", args: args} = Enum.at(actions, 0)
 
     assert args == [
-             "phx.new",
              "my_app",
              "--no-install",
              "--umbrella",
@@ -42,40 +42,33 @@ defmodule Catalyst.Plugin.PhoenixBaseTest do
   end
 
   test "keeps backward compatibility with raw string flags" do
-    opts = [
-      app_path: "my_app",
-      app_name: "My App",
-      flags: ["--no-install", "--no-ecto", "--module", "MyApp"]
-    ]
+    execution = Execution.new(app_path: "my_app", app_name: "My App")
 
-    actions = PhoenixBase.run(opts)
+    opts = [flags: ["--no-install", "--no-ecto", "--module", "MyApp"]]
 
-    assert %Actions.SystemCommand{args: ["phx.new", "my_app" | flags]} = Enum.at(actions, 0)
+    actions = PhoenixBase.run(execution, opts)
+
+    assert %Actions.MixTask{name: "phx.new", args: ["my_app" | flags]} = Enum.at(actions, 0)
     assert flags == ["--no-install", "--no-ecto", "--module", "MyApp"]
   end
 
   test "supports explicit no_* false as positive flag" do
-    opts = [
-      app_path: "my_app",
-      app_name: "My App",
-      flags: [no_install: false, no_ecto: false]
-    ]
+    execution = Execution.new(app_path: "my_app", app_name: "My App")
 
-    actions = PhoenixBase.run(opts)
+    opts = [flags: [no_install: false, no_ecto: false]]
 
-    assert %Actions.SystemCommand{args: args} = Enum.at(actions, 0)
-    assert args == ["phx.new", "my_app", "--install", "--ecto"]
+    actions = PhoenixBase.run(execution, opts)
+
+    assert %Actions.MixTask{name: "phx.new", args: args} = Enum.at(actions, 0)
+    assert args == ["my_app", "--install", "--ecto"]
   end
 
   test "does not scaffold when targeting existing project" do
-    opts = [
-      app_path: "my_app",
-      app_name: "My App",
-      mode: :existing,
-      flags: [install: false]
-    ]
+    execution = Execution.new(app_path: "my_app", app_name: "My App", mode: :existing)
 
-    actions = PhoenixBase.run(opts)
+    opts = [flags: [install: false]]
+
+    actions = PhoenixBase.run(execution, opts)
 
     assert actions == []
   end

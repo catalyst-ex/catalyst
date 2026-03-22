@@ -1,10 +1,13 @@
 defmodule Catalyst.Actions.AddAlias do
   alias Catalyst.CLI
+  alias Catalyst.Execution
   alias Sourceror.Zipper
 
-  defstruct [:key, :commands, :target_file]
+  defstruct [:key, :commands]
 
-  def execute(%__MODULE__{target_file: path} = action) do
+  def execute(%__MODULE__{} = action, execution \\ Execution.new()) do
+    path = Execution.mix_file(execution)
+
     CLI.info("Adding alias: #{action.key}")
 
     patch_mix_file(path, :aliases, fn list_zipper ->

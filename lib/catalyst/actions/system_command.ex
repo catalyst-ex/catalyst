@@ -3,7 +3,7 @@ defmodule Catalyst.Actions.SystemCommand do
 
   defstruct [:cmd, :args, :env, :cd]
 
-  def execute(%__MODULE__{cmd: cmd, args: args, env: env, cd: cd}) do
+  def execute(%__MODULE__{cmd: cmd, args: args, env: env, cd: cd}, _execution \\ nil) do
     args = args || []
     env = env || []
     opts = [stderr_to_stdout: true, env: env]

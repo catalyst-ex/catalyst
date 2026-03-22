@@ -5,9 +5,10 @@ defmodule Catalyst.Actions.AddAliasTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Execution
 
   test "AddAlias exposes expected keys" do
-    expected_keys = [:__struct__, :commands, :key, :target_file] |> Enum.sort()
+    expected_keys = [:__struct__, :commands, :key] |> Enum.sort()
     actual_keys = Actions.AddAlias.__struct__() |> Map.keys() |> Enum.sort()
 
     assert actual_keys == expected_keys
@@ -17,47 +18,45 @@ defmodule Catalyst.Actions.AddAliasTest do
     action =
       struct(Actions.AddAlias,
         key: :setup,
-        commands: ["deps.get", "compile"],
-        target_file: "mix.exs"
+        commands: ["deps.get", "compile"]
       )
 
     assert %Actions.AddAlias{} = action
     assert action.key == :setup
     assert action.commands == ["deps.get", "compile"]
-    assert action.target_file == "mix.exs"
   end
 
   test "AddAlias updates project source end to end" do
     app_path = create_tmp_project!("add_alias")
-    mix_exs = Path.join(app_path, "mix.exs")
+    execution = Execution.new(app_path: app_path)
 
     action =
       struct(Actions.AddAlias,
         key: :quality,
-        commands: ["format", "credo"],
-        target_file: mix_exs
+        commands: ["format", "credo"]
       )
 
-    Executor.run(action)
+    Executor.run(action, execution)
 
+    mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
     assert mix_source =~ "quality: [\"format\", \"credo\"]"
   end
 
   test "AddAlias does not duplicate commands under quality when applied twice" do
     app_path = create_tmp_project!("add_alias_quality_no_dupe")
-    mix_exs = Path.join(app_path, "mix.exs")
+    execution = Execution.new(app_path: app_path)
 
     action =
       struct(Actions.AddAlias,
         key: :quality,
-        commands: ["format", "credo"],
-        target_file: mix_exs
+        commands: ["format", "credo"]
       )
 
-    Executor.run(action)
-    Executor.run(action)
+    Executor.run(action, execution)
+    Executor.run(action, execution)
 
+    mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
 
     assert length(Regex.scan(~r/quality:\s*\[/, mix_source)) == 1
@@ -67,20 +66,19 @@ defmodule Catalyst.Actions.AddAliasTest do
 
   test "AddAlias warns and skips when requested commands already exist" do
     app_path = create_tmp_project!("add_alias_warn_noop")
-    mix_exs = Path.join(app_path, "mix.exs")
+    execution = Execution.new(app_path: app_path)
 
     action =
       struct(Actions.AddAlias,
         key: :quality,
-        commands: ["format", "credo"],
-        target_file: mix_exs
+        commands: ["format", "credo"]
       )
 
-    Executor.run(action)
+    Executor.run(action, execution)
 
     output =
       capture_io(fn ->
-        Executor.run(action)
+        Executor.run(action, execution)
       end)
 
     assert output =~ "warn"
@@ -89,18 +87,18 @@ defmodule Catalyst.Actions.AddAliasTest do
 
   test "AddAlias does not duplicate commands for other aliases" do
     app_path = create_tmp_project!("add_alias_setup_no_dupe")
-    mix_exs = Path.join(app_path, "mix.exs")
+    execution = Execution.new(app_path: app_path)
 
     action =
       struct(Actions.AddAlias,
         key: :setup,
-        commands: ["deps.get", "compile"],
-        target_file: mix_exs
+        commands: ["deps.get", "compile"]
       )
 
-    Executor.run(action)
-    Executor.run(action)
+    Executor.run(action, execution)
+    Executor.run(action, execution)
 
+    mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
 
     assert length(Regex.scan(~r/setup:\s*\[/, mix_source)) == 1

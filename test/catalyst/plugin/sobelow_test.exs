@@ -3,22 +3,24 @@ defmodule Catalyst.Plugin.SobelowTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Execution
   alias Catalyst.Plugin
   alias Catalyst.Plugin.Sobelow
 
   test "applies sobelow plugin actions end to end" do
     app_path = create_tmp_project!("sobelow_app")
+    execution = Execution.new(app_path: app_path)
     gitignore = Path.join(app_path, ".gitignore")
     File.write!(gitignore, "_build\n")
 
     actions =
-      [app_path: app_path]
+      execution
       |> Sobelow.run()
       |> Plugin.normalize_actions()
 
     Enum.each(actions, fn
-      %Actions.SystemCommand{} -> :ok
-      action -> Executor.run(action)
+      %Actions.MixTask{} -> :ok
+      action -> Executor.run(action, execution)
     end)
 
     mix_exs = Path.join(app_path, "mix.exs")
@@ -31,8 +33,8 @@ defmodule Catalyst.Plugin.SobelowTest do
     assert gitignore_source =~ "# Sobelow Security Logs"
     assert gitignore_source =~ ".sobelow"
 
-    assert %Actions.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
-             Enum.find(actions, &match?(%Actions.SystemCommand{}, &1))
+    assert %Actions.MixTask{name: "deps.get"} =
+             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
   end
 
   defp create_tmp_project!(name) do

@@ -17,6 +17,7 @@ defmodule Catalyst.Config.BuilderTest do
     assert config.app.path == "my_app"
     assert config.app.name == "my_app"
     assert config.app.module == "MyApp"
+    assert config.app.otp_app == :my_app
     assert config.plugins == []
   end
 
@@ -37,6 +38,7 @@ defmodule Catalyst.Config.BuilderTest do
     assert %Config{} = config
     assert config.mode == :existing
     assert config.app.path == existing_path
+    assert is_atom(config.app.otp_app)
     assert config.plugins == []
   end
 
@@ -52,6 +54,28 @@ defmodule Catalyst.Config.BuilderTest do
     assert config.app.path == "."
     assert is_binary(config.app.name)
     assert is_binary(config.app.module)
+    assert is_atom(config.app.otp_app)
+  end
+
+  test "normalizes otp_app from display app name when needed" do
+    config =
+      Builder.build!(%{
+        mode: :new,
+        app: %{name: "My App", path: "___", module: "MyApp"},
+        plugins: []
+      })
+
+    assert config.app.otp_app == :my_app
+  end
+
+  test "rejects config when otp_app cannot be derived" do
+    assert_raise RuntimeError, ~r/app.otp_app is missing/, fn ->
+      Builder.build!(%{
+        mode: :new,
+        app: %{name: "___", path: "___", module: "MyApp"},
+        plugins: []
+      })
+    end
   end
 
   test "rejects invalid mode" do

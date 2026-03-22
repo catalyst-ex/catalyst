@@ -3,20 +3,22 @@ defmodule Catalyst.Plugin.CredoTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Execution
   alias Catalyst.Plugin
   alias Catalyst.Plugin.Credo
 
   test "applies credo plugin actions end to end" do
     app_path = create_tmp_project!("credo_app")
+    execution = Execution.new(app_path: app_path)
 
     actions =
-      [app_path: app_path]
+      execution
       |> Credo.run()
       |> Plugin.normalize_actions()
 
     Enum.each(actions, fn
-      %Actions.SystemCommand{} -> :ok
-      action -> Executor.run(action)
+      %Actions.MixTask{} -> :ok
+      action -> Executor.run(action, execution)
     end)
 
     mix_exs = Path.join(app_path, "mix.exs")
@@ -26,8 +28,8 @@ defmodule Catalyst.Plugin.CredoTest do
     assert mix_source =~ "{:credo, \"~> 1.7\", only: [:dev, :test], runtime: false}"
     assert mix_source =~ "quality: [\"format\", \"credo\"]"
 
-    assert %Actions.SystemCommand{cmd: "mix", args: ["deps.get"], cd: ^app_path} =
-             Enum.find(actions, &match?(%Actions.SystemCommand{}, &1))
+    assert %Actions.MixTask{name: "deps.get"} =
+             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
   end
 
   defp create_tmp_project!(name) do

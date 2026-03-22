@@ -1,22 +1,25 @@
 defmodule Catalyst.Actions.AddConfig do
   alias Catalyst.CLI
+  alias Catalyst.Execution
 
-  defstruct [:target_file, :app, :module, :opts]
+  defstruct [:app, :module, :opts]
 
-  def execute(%__MODULE__{target_file: path} = action) do
-    CLI.info(
-      "Configuring: #{inspect(action.app)} #{if action.module, do: inspect(action.module)}"
-    )
+  def execute(%__MODULE__{} = action, execution \\ Execution.new()) do
+    path = Execution.config_file(execution)
+    app = action.app || Execution.otp_app(execution)
+    mod = action.module
+
+    CLI.info("Configuring: #{inspect(app)} #{if mod, do: inspect(mod)}")
 
     unless File.exists?(path), do: raise("Config file not found: #{path}")
 
     source = File.read!(path)
     zipper = source |> Sourceror.parse_string!() |> Sourceror.Zipper.zip()
 
-    if config_exists?(zipper, action.app, action.module) do
+    if config_exists?(zipper, app, mod) do
       CLI.info("   ↳ Config already exists, skipping.")
     else
-      new_ast = build_config_ast(action.app, action.module, action.opts)
+      new_ast = build_config_ast(app, mod, action.opts)
 
       new_zipper =
         case find_import_config(zipper) do

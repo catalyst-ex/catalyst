@@ -2,39 +2,29 @@ defmodule Catalyst.Plugin.Credo do
   use Catalyst.Plugin
 
   @impl true
-  def run(opts) do
-    mix_file = Path.join(opts[:app_path], "mix.exs")
-
+  def run(_execution, _opts \\ []) do
     [
       %Actions.AddDependency{
         name: :credo,
         version: "~> 1.7",
-        opts: [only: [:dev, :test], runtime: false],
-        target_file: mix_file
+        opts: [only: [:dev, :test], runtime: false]
       },
       %Actions.AddAlias{
         key: :quality,
-        commands: ["format", "credo"],
-        target_file: mix_file
+        commands: ["format", "credo"]
       },
       %Actions.AddFile{
-        path: Path.join(opts[:app_path], ".credo.exs"),
+        path: ".credo.exs",
         content: read_template!(".credo.exs")
       },
-      %Actions.SystemCommand{
-        cmd: "mix",
-        args: ["deps.get"],
-        cd: opts[:app_path]
-      }
+      %Actions.MixTask{name: "deps.get"}
     ]
   end
 
   @impl true
-  def post_validate(opts) do
-    app_path = opts[:app_path]
-
-    command = %Actions.SystemCommand{cmd: "mix", args: ["credo"], cd: app_path}
-    Catalyst.Plugin.run_system_command(command)
+  def post_validate(execution, _opts) do
+    task = %Actions.MixTask{name: "credo"}
+    Catalyst.Plugin.run_mix_task(task, execution)
   end
 
   defp read_template!(filename) do

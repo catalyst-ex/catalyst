@@ -3,20 +3,18 @@ defmodule Catalyst.Plugin.GithubCI do
   alias Catalyst.Actions, as: Action
 
   @impl true
-  def run(opts) do
-    app_path = opts[:app_path]
-
+  def run(_execution, _opts \\ []) do
     [
       %Action.AddFile{
-        path: Path.join([app_path, ".github", "workflows", "ci.yml"]),
+        path: ".github/workflows/ci.yml",
         content: File.read!(template_path("workflows/ci.yml"))
       },
       %Action.AddFile{
-        path: Path.join([app_path, ".github", "actions", "build", "action.yml"]),
+        path: ".github/actions/build/action.yml",
         content: File.read!(template_path("actions/build/action.yml"))
       },
       %Action.AddFile{
-        path: Path.join([app_path, ".github", "pull_request_template.md"]),
+        path: ".github/pull_request_template.md",
         content: File.read!(template_path("pull_request_template.md"))
       }
     ]

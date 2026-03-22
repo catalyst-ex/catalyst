@@ -1,10 +1,13 @@
 defmodule Catalyst.Actions.AddDependency do
   alias Catalyst.CLI
+  alias Catalyst.Execution
   alias Sourceror.Zipper
 
-  defstruct [:name, :version, :target_file, :opts]
+  defstruct [:name, :version, :opts]
 
-  def execute(%__MODULE__{target_file: path} = action) do
+  def execute(%__MODULE__{} = action, execution \\ Execution.new()) do
+    path = Execution.mix_file(execution)
+
     CLI.info("Adding dependency: #{action.name}")
 
     patch_mix_file(path, :deps, fn zipper ->

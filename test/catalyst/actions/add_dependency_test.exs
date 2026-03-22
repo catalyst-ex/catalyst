@@ -3,9 +3,10 @@ defmodule Catalyst.Actions.AddDependencyTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Execution
 
   test "AddDependency exposes expected keys" do
-    expected_keys = [:__struct__, :name, :opts, :target_file, :version] |> Enum.sort()
+    expected_keys = [:__struct__, :name, :opts, :version] |> Enum.sort()
     actual_keys = Actions.AddDependency.__struct__() |> Map.keys() |> Enum.sort()
 
     assert actual_keys == expected_keys
@@ -16,31 +17,29 @@ defmodule Catalyst.Actions.AddDependencyTest do
       struct(Actions.AddDependency,
         name: :plug,
         version: "~> 1.0",
-        target_file: "mix.exs",
         opts: [only: :dev]
       )
 
     assert %Actions.AddDependency{} = action
     assert action.name == :plug
     assert action.version == "~> 1.0"
-    assert action.target_file == "mix.exs"
     assert action.opts == [only: :dev]
   end
 
   test "AddDependency updates project source end to end" do
     app_path = create_tmp_project!("add_dependency")
-    mix_exs = Path.join(app_path, "mix.exs")
+    execution = Execution.new(app_path: app_path)
 
     action =
       struct(Actions.AddDependency,
         name: :plug,
         version: "~> 1.0",
-        target_file: mix_exs,
         opts: [only: :dev]
       )
 
-    Executor.run(action)
+    Executor.run(action, execution)
 
+    mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
     assert mix_source =~ ":plug"
     assert mix_source =~ "\"~> 1.0\""
@@ -49,19 +48,19 @@ defmodule Catalyst.Actions.AddDependencyTest do
 
   test "AddDependency does not duplicate dependency when applied twice" do
     app_path = create_tmp_project!("add_dependency_no_dupe")
-    mix_exs = Path.join(app_path, "mix.exs")
+    execution = Execution.new(app_path: app_path)
 
     action =
       struct(Actions.AddDependency,
         name: :plug,
         version: "~> 1.0",
-        target_file: mix_exs,
         opts: []
       )
 
-    Executor.run(action)
-    Executor.run(action)
+    Executor.run(action, execution)
+    Executor.run(action, execution)
 
+    mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
     assert length(Regex.scan(~r/\bplug:\s*"~> 1\.0"/, mix_source)) == 1
   end
