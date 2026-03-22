@@ -21,7 +21,7 @@ defmodule Catalyst.MixProject do
       # Project
       app: @app,
       version: @version,
-      elixir: "~> 1.18",
+      elixir: "~> 1.19",
       description: description(),
       package: package(),
       deps: deps(),
