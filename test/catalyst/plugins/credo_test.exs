@@ -3,7 +3,7 @@ defmodule Catalyst.Plugins.CredoTest do
 
   alias Catalyst.Actions
   alias Catalyst.Execution
-  alias Catalyst.Plugin
+  alias Catalyst.ValidationAction
   alias Catalyst.Plugins.Credo
 
   test "applies credo plugin actions end to end" do
@@ -13,7 +13,6 @@ defmodule Catalyst.Plugins.CredoTest do
     actions =
       execution
       |> Credo.run()
-      |> Plugin.normalize_actions()
 
     Enum.each(actions, fn
       %Actions.MixTask{} -> :ok
@@ -29,6 +28,14 @@ defmodule Catalyst.Plugins.CredoTest do
 
     assert %Actions.MixTask{name: "deps.get"} =
              Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+  end
+
+  test "post_validate returns required credo validation action" do
+    validations = Credo.post_validate(Execution.new(app_path: "."), [])
+
+    assert [%ValidationAction{} = validation] = validations
+    assert validation.required
+    assert %Actions.MixTask{name: "credo", args: nil} = validation.action
   end
 
   defp create_tmp_project!(name) do

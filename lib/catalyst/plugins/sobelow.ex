@@ -1,6 +1,5 @@
 defmodule Catalyst.Plugins.Sobelow do
   use Catalyst.Plugin
-  alias Catalyst.CLI
 
   @impl true
   def run(_execution, _opts \\ []) do
@@ -23,27 +22,14 @@ defmodule Catalyst.Plugins.Sobelow do
   end
 
   @impl true
-  def post_validate(execution, opts) do
+  def post_validate(_execution, opts) do
     strict? = Keyword.get(opts, :strict_post_validate, false)
 
-    task = %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]}
-
-    case Catalyst.Plugin.run_mix_task(task, execution) do
-      :ok ->
-        :ok
-
-      {:error, message} ->
-        message = "mix sobelow --exit low failed:\n\n #{message}"
-
-        if strict? do
-          {:error, message}
-        else
-          CLI.warn(
-            "Sobelow post-validation reported issues but strict mode is off.\n\n#{message}"
-          )
-
-          :ok
-        end
-    end
+    [
+      %Catalyst.ValidationAction{
+        action: %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]},
+        required: strict?
+      }
+    ]
   end
 end

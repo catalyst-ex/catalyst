@@ -3,7 +3,7 @@ defmodule Catalyst.Plugins.SobelowTest do
 
   alias Catalyst.Actions
   alias Catalyst.Execution
-  alias Catalyst.Plugin
+  alias Catalyst.ValidationAction
   alias Catalyst.Plugins.Sobelow
 
   test "applies sobelow plugin actions end to end" do
@@ -15,7 +15,6 @@ defmodule Catalyst.Plugins.SobelowTest do
     actions =
       execution
       |> Sobelow.run()
-      |> Plugin.normalize_actions()
 
     Enum.each(actions, fn
       %Actions.MixTask{} -> :ok
@@ -34,6 +33,22 @@ defmodule Catalyst.Plugins.SobelowTest do
 
     assert %Actions.MixTask{name: "deps.get"} =
              Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+  end
+
+  test "post_validate returns optional action when strict mode is off" do
+    validations = Sobelow.post_validate(Execution.new(app_path: "."), [])
+
+    assert [%ValidationAction{} = validation] = validations
+    refute validation.required
+    assert %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]} = validation.action
+  end
+
+  test "post_validate returns required action when strict mode is on" do
+    validations = Sobelow.post_validate(Execution.new(app_path: "."), strict_post_validate: true)
+
+    assert [%ValidationAction{} = validation] = validations
+    assert validation.required
+    assert %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]} = validation.action
   end
 
   defp create_tmp_project!(name) do

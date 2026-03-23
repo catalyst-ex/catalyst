@@ -3,7 +3,6 @@ defmodule Catalyst.Plugins.MailerTest do
 
   alias Catalyst.Actions
   alias Catalyst.Execution
-  alias Catalyst.Plugin
   alias Catalyst.Plugins.Mailer
 
   test "applies mailer plugin actions end to end" do
@@ -18,7 +17,6 @@ defmodule Catalyst.Plugins.MailerTest do
           otp_app: :my_app
         )
         |> Mailer.run()
-        |> Plugin.normalize_actions()
       end)
 
     execution = Execution.new(app_path: app_path, otp_app: :my_app)
@@ -57,7 +55,6 @@ defmodule Catalyst.Plugins.MailerTest do
           otp_app: :my_app
         )
         |> Mailer.run()
-        |> Plugin.normalize_actions()
       end)
 
     execution = Execution.new(app_path: app_path, app_name: "My App", otp_app: :my_app)
@@ -78,19 +75,15 @@ defmodule Catalyst.Plugins.MailerTest do
     refute File.exists?(Path.join(app_root, "lib/My App/mailer.ex"))
   end
 
-  test "post_validate returns a valid callback result when explicitly implemented" do
-    if mailer_has_explicit_post_validate?() do
-      {tmp_root, app_path, _app_root} = create_tmp_project!("mailer_post_validate")
+  test "post_validate defaults to an empty validation action list" do
+    {tmp_root, app_path, _app_root} = create_tmp_project!("mailer_post_validate")
 
-      result =
-        File.cd!(tmp_root, fn ->
-          Mailer.post_validate(Execution.new(app_path: app_path, app_module: "MyApp"), [])
-        end)
+    result =
+      File.cd!(tmp_root, fn ->
+        Mailer.post_validate(Execution.new(app_path: app_path, app_module: "MyApp"), [])
+      end)
 
-      assert result == :ok or match?({:error, _}, result)
-    else
-      assert true
-    end
+    assert result == []
   end
 
   defp create_tmp_project!(name) do
@@ -138,13 +131,5 @@ defmodule Catalyst.Plugins.MailerTest do
     """
     import Config
     """
-  end
-
-  defp mailer_has_explicit_post_validate? do
-    plugin_file = Path.expand("lib/catalyst/plugins/mailer.ex", File.cwd!())
-
-    plugin_file
-    |> File.read!()
-    |> String.match?(~r/def\s+post_validate\s*\(/)
   end
 end

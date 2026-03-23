@@ -7,7 +7,7 @@ defmodule Catalyst.Plugins.ElixirBaseTest do
   test "generates a standard OTP application" do
     execution = Execution.new(app_path: "my_app", app_name: "my_app")
 
-    actions = ElixirBase.run(execution) |> Catalyst.Plugin.normalize_actions()
+    actions = ElixirBase.run(execution)
 
     assert [%Actions.MixTask{}, %Actions.MixTask{}, %Actions.AddFile{}] = actions
 
@@ -24,7 +24,7 @@ defmodule Catalyst.Plugins.ElixirBaseTest do
   test "can disable supervision tree" do
     execution = Execution.new(app_path: "simple_lib", app_name: "simple_lib")
 
-    actions = ElixirBase.run(execution, sup: false) |> Catalyst.Plugin.normalize_actions()
+    actions = ElixirBase.run(execution, sup: false)
 
     # Verify --sup flag is missing
     assert %Actions.MixTask{name: "new", args: ["simple_lib"]} = Enum.at(actions, 0)
@@ -34,7 +34,7 @@ defmodule Catalyst.Plugins.ElixirBaseTest do
   test "does not scaffold when targeting existing project" do
     execution = Execution.new(app_path: "my_app", app_name: "my_app", mode: :existing)
 
-    actions = ElixirBase.run(execution) |> Catalyst.Plugin.normalize_actions()
+    actions = ElixirBase.run(execution)
 
     assert actions == []
   end
