@@ -4,6 +4,7 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
   alias Catalyst.Actions
   alias Catalyst.Execution
   alias Catalyst.Plugins.PhoenixBase
+  alias Catalyst.ValidationAction
 
   test "converts keyword flags to phx.new argv" do
     execution = Execution.new(app_path: "my_app", app_name: "My App")
@@ -71,5 +72,27 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
     actions = PhoenixBase.run(execution, opts)
 
     assert actions == []
+  end
+
+  test "post_validate verifies phx.new/deps.get side effects in new mode" do
+    execution = Execution.new(app_path: "my_app", app_name: "My App", mode: :new)
+
+    validations = PhoenixBase.post_validate(execution, [])
+
+    assert [%ValidationAction{} = validation] = validations
+    assert validation.required
+
+    assert %Actions.Function{
+             module: Catalyst.Plugins.PhoenixBase,
+             function: :validate_scaffolded_project!,
+             args: [^execution]
+           } =
+             validation.action
+  end
+
+  test "post_validate is empty in existing mode" do
+    execution = Execution.new(app_path: "my_app", app_name: "My App", mode: :existing)
+
+    assert PhoenixBase.post_validate(execution, []) == []
   end
 end

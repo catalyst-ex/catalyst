@@ -32,6 +32,40 @@ defmodule Catalyst.Plugins.PhoenixBase do
     end
   end
 
+  @impl true
+  def post_validate(execution, _opts) do
+    if execution.mode == :existing do
+      []
+    else
+      [
+        %Catalyst.ValidationAction{
+          action: %Actions.Function{
+            module: __MODULE__,
+            function: :validate_scaffolded_project!,
+            args: [execution]
+          }
+        }
+      ]
+    end
+  end
+
+  def validate_scaffolded_project!(execution) do
+    app_root = Catalyst.Execution.app_root(execution)
+    mix_file = Path.join(app_root, "mix.exs")
+    lock_file = Path.join(app_root, "mix.lock")
+
+    cond do
+      not File.exists?(mix_file) ->
+        raise "Expected Phoenix scaffold output missing: #{mix_file}. This suggests mix phx.new did not complete."
+
+      not File.exists?(lock_file) ->
+        raise "Expected dependency lockfile missing: #{lock_file}. This suggests mix deps.get did not complete."
+
+      true ->
+        :ok
+    end
+  end
+
   defp flags_to_argv(flags) when is_map(flags), do: flags |> Enum.to_list() |> flags_to_argv()
 
   defp flags_to_argv(flags) when is_list(flags) do
