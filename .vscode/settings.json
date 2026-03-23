@@ -1,0 +1,7 @@
+{
+	"search.exclude": {
+		"**/.elixir_ls": true,
+		"**/_build": true,
+		"**/deps": true
+	}
+}
