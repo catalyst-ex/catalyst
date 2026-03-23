@@ -59,23 +59,15 @@ defmodule Catalyst.Config.Builder do
 
   defp normalize_app(%Config{app: %Config.App{} = app} = config) do
     app_path = app.path || default_app_path(config.mode)
-    app_name = app.name || infer_app_name(app_path)
+    app_name = app.name
     app_module = app.module || infer_app_module(app_name)
-    app_otp = app.otp_app || infer_otp_app(app_path, app_name)
+    app_otp = app.otp_app
 
     %{config | app: %{app | path: app_path, name: app_name, module: app_module, otp_app: app_otp}}
   end
 
   defp default_app_path(:existing), do: "."
   defp default_app_path(_), do: nil
-
-  defp infer_app_name(nil), do: nil
-
-  defp infer_app_name(path) do
-    path
-    |> Path.expand()
-    |> Path.basename()
-  end
 
   defp infer_app_module(nil), do: nil
 
@@ -84,38 +76,6 @@ defmodule Catalyst.Config.Builder do
     |> to_string()
     |> Macro.camelize()
   end
-
-  defp infer_otp_app(app_path, app_name) do
-    case app_path_otp_name(app_path) || normalize_otp_name(app_name) do
-      nil -> nil
-      name -> String.to_atom(name)
-    end
-  end
-
-  defp app_path_otp_name(app_path) when is_binary(app_path) do
-    app_path
-    |> Path.expand()
-    |> Path.basename()
-    |> normalize_otp_name()
-  end
-
-  defp app_path_otp_name(_), do: nil
-
-  defp normalize_otp_name(name) when is_binary(name) do
-    normalized =
-      name
-      |> String.downcase()
-      |> String.replace(~r/[^a-z0-9_]/u, "_")
-      |> String.replace(~r/_+/, "_")
-      |> String.trim("_")
-
-    if normalized == "", do: nil, else: normalized
-  end
-
-  defp normalize_otp_name(name) when is_atom(name),
-    do: name |> Atom.to_string() |> normalize_otp_name()
-
-  defp normalize_otp_name(_), do: nil
 
   defp normalize_plugins(%Config{} = config) do
     %{config | plugins: config.plugins || []}

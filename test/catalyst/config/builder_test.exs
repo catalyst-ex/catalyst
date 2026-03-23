@@ -4,11 +4,11 @@ defmodule Catalyst.Config.BuilderTest do
   alias Catalyst.Config
   alias Catalyst.Config.Builder
 
-  test "builds config in :new mode and infers app defaults" do
+  test "builds config in :new mode with explicit app identity fields" do
     config =
       Builder.build!(%{
         mode: :new,
-        app: %{path: "my_app"},
+        app: %{path: "my_app", name: "my_app", otp_app: :my_app},
         plugins: []
       })
 
@@ -31,7 +31,7 @@ defmodule Catalyst.Config.BuilderTest do
 
     config =
       Builder.build!(%{
-        app: %{path: existing_path},
+        app: %{path: existing_path, name: "existing_app", otp_app: :existing_app},
         plugins: []
       })
 
@@ -42,30 +42,29 @@ defmodule Catalyst.Config.BuilderTest do
     assert config.plugins == []
   end
 
-  test "defaults existing project app path to current directory" do
+  test "defaults existing project app path to current directory when identity is provided" do
     config =
       Builder.build!(%Config{
         mode: :existing,
-        app: %Config.App{},
+        app: %Config.App{name: "my_app", otp_app: :my_app},
         plugins: []
       })
 
     assert config.mode == :existing
     assert config.app.path == "."
-    assert is_binary(config.app.name)
+    assert config.app.name == "my_app"
     assert is_binary(config.app.module)
-    assert is_atom(config.app.otp_app)
+    assert config.app.otp_app == :my_app
   end
 
-  test "normalizes otp_app from display app name when needed" do
-    config =
+  test "rejects config when app.name is missing" do
+    assert_raise RuntimeError, ~r/app.name is missing/, fn ->
       Builder.build!(%{
         mode: :new,
-        app: %{name: "My App", path: "___", module: "MyApp"},
+        app: %{path: "my_app", module: "MyApp", otp_app: :my_app},
         plugins: []
       })
-
-    assert config.app.otp_app == :my_app
+    end
   end
 
   test "rejects config when otp_app cannot be derived" do
