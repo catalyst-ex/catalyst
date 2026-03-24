@@ -1,5 +1,6 @@
 defmodule Catalyst.Actions.AddConfig do
   alias Catalyst.CLI
+  alias Catalyst.Error
   alias Catalyst.Execution
 
   defstruct [:app, :module, :opts]
@@ -11,7 +12,12 @@ defmodule Catalyst.Actions.AddConfig do
 
     CLI.info("Configuring: #{inspect(app)} #{if mod, do: inspect(mod)}")
 
-    unless File.exists?(path), do: raise("Config file not found: #{path}")
+    unless File.exists?(path) do
+      raise Error,
+        code: :file_not_found,
+        reason: :missing_config_file,
+        context: %{path: path}
+    end
 
     source = File.read!(path)
     zipper = source |> Sourceror.parse_string!() |> Sourceror.Zipper.zip()

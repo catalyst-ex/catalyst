@@ -1,18 +1,8 @@
 defmodule Catalyst.Plugins.PhoenixBase do
   use Catalyst.Plugin
+  alias Catalyst.Error
 
   @impl true
-  @spec run(any()) :: [
-          %{
-            :__struct__ => Catalyst.Actions.AddFile | Catalyst.Actions.MixTask,
-            optional(:args) => nil | [...],
-            optional(:content) => <<_::64, _::_*8>>,
-            optional(:env) => nil,
-            optional(:name) => <<_::56, _::_*8>>,
-            optional(:path) => <<_::72>>,
-            optional(:template_path) => nil
-          }
-        ]
   def run(execution, opts \\ []) do
     if execution.mode == :existing do
       []
@@ -56,10 +46,16 @@ defmodule Catalyst.Plugins.PhoenixBase do
 
     cond do
       not File.exists?(mix_file) ->
-        raise "Expected Phoenix scaffold output missing: #{mix_file}. This suggests mix phx.new did not complete."
+        raise Error,
+          code: :phx_scaffold_missing,
+          reason: :missing_mix_file,
+          context: %{path: mix_file}
 
       not File.exists?(lock_file) ->
-        raise "Expected dependency lockfile missing: #{lock_file}. This suggests mix deps.get did not complete."
+        raise Error,
+          code: :deps_lock_missing,
+          reason: :missing_lock_file,
+          context: %{path: lock_file}
 
       true ->
         :ok

@@ -1,5 +1,6 @@
 defmodule Catalyst.Actions.AddAlias do
   alias Catalyst.CLI
+  alias Catalyst.Error
   alias Catalyst.Execution
   alias Sourceror.Zipper
 
@@ -21,7 +22,12 @@ defmodule Catalyst.Actions.AddAlias do
   end
 
   defp patch_mix_file(path, fun_name, transform_fn) do
-    unless File.exists?(path), do: raise("Could not find file to patch: #{path}")
+    unless File.exists?(path) do
+      raise Error,
+        code: :file_not_found,
+        reason: :missing_mix_file,
+        context: %{path: path, function: fun_name}
+    end
 
     source = File.read!(path)
 

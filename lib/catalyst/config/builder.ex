@@ -1,5 +1,6 @@
 defmodule Catalyst.Config.Builder do
   alias Catalyst.Config
+  alias Catalyst.Error
 
   @allowed_modes [:new, :existing]
 
@@ -26,7 +27,10 @@ defmodule Catalyst.Config.Builder do
   end
 
   def build!(other) do
-    raise "Config must be a %Catalyst.Config{} struct, map, or keyword list, got: #{inspect(other)}"
+    raise Error,
+      code: :invalid_config_type,
+      reason: :invalid_type,
+      context: %{value: other}
   end
 
   defp to_app_struct(%Config.App{} = app), do: app
@@ -43,7 +47,10 @@ defmodule Catalyst.Config.Builder do
   end
 
   defp to_app_struct(other) do
-    raise "Config Error: app must be a %Catalyst.Config.App{} struct, map, or keyword list, got: #{inspect(other)}"
+    raise Error,
+      code: :invalid_app_config_type,
+      reason: :invalid_type,
+      context: %{value: other}
   end
 
   defp normalize_mode(config) do
@@ -84,22 +91,40 @@ defmodule Catalyst.Config.Builder do
   defp validate!(%Config{} = config) do
     cond do
       config.mode not in @allowed_modes ->
-        raise "Config Error: mode must be one of #{inspect(@allowed_modes)}"
+        raise Error,
+          code: :invalid_mode,
+          reason: :validation_error,
+          context: %{mode: config.mode, allowed_modes: @allowed_modes}
 
       is_nil(config.app.path) ->
-        raise "Config Error: app.path is missing"
+        raise Error,
+          code: :missing_app_path,
+          reason: :validation_error,
+          context: %{field: :app_path}
 
       is_nil(config.app.name) ->
-        raise "Config Error: app.name is missing"
+        raise Error,
+          code: :missing_app_name,
+          reason: :validation_error,
+          context: %{field: :app_name}
 
       is_nil(config.app.module) ->
-        raise "Config Error: app.module is missing"
+        raise Error,
+          code: :missing_app_module,
+          reason: :validation_error,
+          context: %{field: :app_module}
 
       is_nil(config.app.otp_app) ->
-        raise "Config Error: app.otp_app is missing"
+        raise Error,
+          code: :missing_otp_app,
+          reason: :validation_error,
+          context: %{field: :otp_app}
 
       !is_list(config.plugins) ->
-        raise "Config Error: plugins must be a list"
+        raise Error,
+          code: :invalid_plugins,
+          reason: :validation_error,
+          context: %{plugins: config.plugins}
 
       true ->
         config

@@ -1,6 +1,7 @@
 defmodule Catalyst do
   alias Catalyst.Actions.Executor
   alias Catalyst.CLI
+  alias Catalyst.Error
   alias Catalyst.Execution
   alias Catalyst.ValidationAction
 
@@ -20,12 +21,16 @@ defmodule Catalyst do
               %{validation | plugins: [plugin_mod]}
 
             %ValidationAction{action: action} ->
-              raise ArgumentError,
-                    "Invalid validation action from #{inspect(plugin_mod)}: #{inspect(action)}. Expected a struct in Catalyst.ValidationAction.action."
+              raise Error,
+                code: :invalid_validation_action,
+                reason: :invalid_action,
+                context: %{plugin: plugin_mod, action: action}
 
             invalid ->
-              raise ArgumentError,
-                    "Invalid post_validate item from #{inspect(plugin_mod)}: #{inspect(invalid)}. Expected Catalyst.ValidationAction struct."
+              raise Error,
+                code: :invalid_post_validate_item,
+                reason: :invalid_validation_item,
+                context: %{plugin: plugin_mod, item: invalid}
           end)
 
         {
@@ -46,8 +51,10 @@ defmodule Catalyst do
   defp normalize_plugin_spec!(plugin_mod) when is_atom(plugin_mod), do: {plugin_mod, []}
 
   defp normalize_plugin_spec!(invalid) do
-    raise ArgumentError,
-          "Invalid plugin entry: #{inspect(invalid)}. Expected module, {module}, or {module, keyword_opts}."
+    raise Error,
+      code: :invalid_plugin_spec,
+      reason: :invalid_plugin_entry,
+      context: %{plugin_spec: invalid}
   end
 
   defp execute_actions(actions, execution) do
@@ -118,7 +125,10 @@ defmodule Catalyst do
           message = format_validation_failure(validation, reason)
 
           if validation.required do
-            Mix.raise(message)
+            raise Error,
+              code: :post_validation_failed,
+              reason: :required_validation_failed,
+              context: %{validation: validation, error: reason}
           else
             [message | warnings]
           end
@@ -165,6 +175,8 @@ defmodule Catalyst do
       |> Enum.map(&inspect/1)
       |> Enum.join(", ")
 
-    "Post-validation failed in #{plugins} for #{inspect(validation.action)}:\n\n#{reason}"
+    reason_message = to_string(reason)
+
+    "Post-validation failed in #{plugins} for #{inspect(validation.action)}:\n\n#{reason_message}"
   end
 end
