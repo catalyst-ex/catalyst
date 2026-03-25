@@ -1,5 +1,7 @@
 defmodule Catalyst.Actions.AddDependencyTest do
-  use ExUnit.Case, async: true
+  use Catalyst.TestSupport.ProjectCase, async: true
+
+  @moduletag setup_project: true
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
@@ -26,8 +28,7 @@ defmodule Catalyst.Actions.AddDependencyTest do
     assert action.opts == [only: :dev]
   end
 
-  test "AddDependency updates project source end to end" do
-    app_path = create_tmp_project!("add_dependency")
+  test "AddDependency updates project source end to end", %{app_path: app_path} do
     execution = Execution.new(app_path: app_path)
 
     action =
@@ -46,8 +47,7 @@ defmodule Catalyst.Actions.AddDependencyTest do
     assert mix_source =~ "only: :dev"
   end
 
-  test "AddDependency does not duplicate dependency when applied twice" do
-    app_path = create_tmp_project!("add_dependency_no_dupe")
+  test "AddDependency does not duplicate dependency when applied twice", %{app_path: app_path} do
     execution = Execution.new(app_path: app_path)
 
     action =
@@ -63,47 +63,5 @@ defmodule Catalyst.Actions.AddDependencyTest do
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
     assert length(Regex.scan(~r/\bplug:\s*"~> 1\.0"/, mix_source)) == 1
-  end
-
-  defp create_tmp_project!(name) do
-    base = Path.join(System.tmp_dir!(), "catalyst_tests")
-    uniq = Integer.to_string(System.unique_integer([:positive, :monotonic]))
-    app_path = Path.join(base, "#{name}_#{uniq}")
-
-    File.mkdir_p!(app_path)
-    File.write!(Path.join(app_path, "mix.exs"), mix_project_source())
-    on_exit(fn -> File.rm_rf(app_path) end)
-
-    app_path
-  end
-
-  defp mix_project_source do
-    """
-    defmodule TmpProject.MixProject do
-      use Mix.Project
-
-      def project do
-        [
-          app: :tmp_project,
-          version: \"0.1.0\",
-          elixir: \"~> 1.15\",
-          aliases: aliases(),
-          deps: deps()
-        ]
-      end
-
-      def application do
-        [extra_applications: [:logger]]
-      end
-
-      defp deps do
-        []
-      end
-
-      defp aliases do
-        []
-      end
-    end
-    """
   end
 end

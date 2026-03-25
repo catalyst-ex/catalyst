@@ -1,13 +1,14 @@
 defmodule Catalyst.Plugins.CredoTest do
-  use ExUnit.Case, async: true
+  use Catalyst.TestSupport.ProjectCase, async: true
+
+  @moduletag setup_project: true
 
   alias Catalyst.Actions
   alias Catalyst.Execution
   alias Catalyst.ValidationAction
   alias Catalyst.Plugins.Credo
 
-  test "applies credo plugin actions end to end" do
-    app_path = create_tmp_project!("credo_app")
+  test "applies credo plugin actions end to end", %{app_path: app_path} do
     execution = Execution.new(app_path: app_path)
 
     actions =
@@ -36,47 +37,5 @@ defmodule Catalyst.Plugins.CredoTest do
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
     assert %Actions.MixTask{name: "credo", args: nil} = validation.action
-  end
-
-  defp create_tmp_project!(name) do
-    base = Path.join(System.tmp_dir!(), "catalyst_tests")
-    uniq = Integer.to_string(System.unique_integer([:positive, :monotonic]))
-    app_path = Path.join(base, "#{name}_#{uniq}")
-
-    File.mkdir_p!(app_path)
-    File.write!(Path.join(app_path, "mix.exs"), mix_project_source())
-    on_exit(fn -> File.rm_rf(app_path) end)
-
-    app_path
-  end
-
-  defp mix_project_source do
-    """
-    defmodule TmpProject.MixProject do
-      use Mix.Project
-
-      def project do
-        [
-          app: :tmp_project,
-          version: \"0.1.0\",
-          elixir: \"~> 1.15\",
-          aliases: aliases(),
-          deps: deps()
-        ]
-      end
-
-      def application do
-        [extra_applications: [:logger]]
-      end
-
-      defp deps do
-        []
-      end
-
-      defp aliases do
-        []
-      end
-    end
-    """
   end
 end
