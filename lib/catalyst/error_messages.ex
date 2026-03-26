@@ -65,6 +65,21 @@ defmodule Catalyst.ErrorMessages do
     do:
       "Invalid plugin entry: #{inspect(plugin_spec)}. Expected module, {module}, or {module, keyword_opts}."
 
+  def message(:missing_execution_config, _),
+    do: "Execution config is missing. Build execution from config via Execution.from_config/1."
+
+  def message(:invalid_execution_config, %{path: path}),
+    do: "Execution config is invalid. Missing value at #{inspect(path)}."
+
+  def message(:legacy_execution_fields, %{keys: keys}),
+    do:
+      "Legacy Execution fields are no longer supported: #{inspect(keys)}. Pass config: ... to Execution.new/1."
+
+  def message(:plugin_execution_failed, %{plugin_run: plugin_run, error: error}) do
+    plugin = inspect(plugin_run.plugin)
+    "Plugin execution failed in #{plugin}:\n\n#{error}"
+  end
+
   def message(:post_validation_failed, %{validation: validation, error: reason}) do
     plugins =
       validation.plugins

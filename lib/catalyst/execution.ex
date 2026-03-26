@@ -1,39 +1,60 @@
 defmodule Catalyst.Execution do
   @moduledoc false
 
-  defstruct [:app_path, :app_name, :app_module, :otp_app, :mode]
+  alias Catalyst.Error
+
+  defstruct [
+    :config,
+    plugin_runs: [],
+    action_executions: []
+  ]
 
   def new(opts \\ [])
   def new(opts) when is_list(opts), do: opts |> Enum.into(%{}) |> new()
 
   def new(%{} = attrs) do
     %__MODULE__{
-      app_path: Map.get(attrs, :app_path) || ".",
-      app_name: Map.get(attrs, :app_name),
-      app_module: Map.get(attrs, :app_module),
-      otp_app: Map.get(attrs, :otp_app),
-      mode: Map.get(attrs, :mode)
+      config: Map.get(attrs, :config),
+      plugin_runs: Map.get(attrs, :plugin_runs, []),
+      action_executions: Map.get(attrs, :action_executions, [])
     }
   end
 
   def from_config(config) do
     new(%{
-      app_path: config.app.path,
-      app_name: config.app.name,
-      app_module: config.app.module,
-      otp_app: config.app.otp_app,
-      mode: config.mode
+      config: config,
+      plugin_runs: [],
+      action_executions: []
     })
   end
 
-  def app_root(%__MODULE__{app_path: path}) do
-    Path.expand(path || ".")
+  def record_plugin_run(%__MODULE__{} = execution, run) when is_map(run) do
+    %{execution | plugin_runs: execution.plugin_runs ++ [run]}
   end
 
-  def otp_app(%__MODULE__{otp_app: otp_app}) when is_atom(otp_app) and not is_nil(otp_app),
-    do: otp_app
+  def record_action_execution(%__MODULE__{} = execution, action_execution) do
+    %{execution | action_executions: execution.action_executions ++ [action_execution]}
+  end
 
-  def otp_app(%__MODULE__{}), do: nil
+  def mode(%__MODULE__{} = execution), do: fetch!(execution, [:mode], :missing_mode)
+
+  def app_path(%__MODULE__{} = execution), do: fetch!(execution, [:app, :path], :missing_app_path)
+
+  def app_name(%__MODULE__{} = execution), do: fetch!(execution, [:app, :name], :missing_app_name)
+
+  def app_module(%__MODULE__{} = execution),
+    do: fetch!(execution, [:app, :module], :missing_app_module)
+
+  def otp_app(%__MODULE__{} = execution) do
+    case fetch!(execution, [:app, :otp_app], :missing_otp_app) do
+      otp_app when is_atom(otp_app) and not is_nil(otp_app) -> otp_app
+      _ -> nil
+    end
+  end
+
+  def app_root(%__MODULE__{} = execution) do
+    Path.expand(app_path(execution) || ".")
+  end
 
   def resolve_path(%__MODULE__{} = execution, path) do
     if Path.type(path) == :absolute do
@@ -47,4 +68,42 @@ defmodule Catalyst.Execution do
 
   def config_file(%__MODULE__{} = execution),
     do: resolve_path(execution, Path.join("config", "config.exs"))
+
+  defp fetch!(%__MODULE__{config: nil}, _path, _reason) do
+    raise Error,
+      code: :missing_execution_config,
+      reason: :missing_execution_config,
+      context: %{}
+  end
+
+  defp fetch!(%__MODULE__{config: config}, path, reason) do
+    value =
+      Enum.reduce_while(path, config, fn key, current ->
+        if is_map(current) do
+          case Map.fetch(current, key) do
+            {:ok, next} -> {:cont, next}
+            :error -> {:halt, :missing}
+          end
+        else
+          {:halt, :missing}
+        end
+      end)
+
+    case value do
+      :missing ->
+        raise Error,
+          code: :invalid_execution_config,
+          reason: reason,
+          context: %{path: path}
+
+      nil ->
+        raise Error,
+          code: :invalid_execution_config,
+          reason: reason,
+          context: %{path: path}
+
+      resolved ->
+        resolved
+    end
+  end
 end
