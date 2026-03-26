@@ -4,7 +4,6 @@ defmodule Catalyst.Plugins.MailerTest do
   @moduletag setup_project: true
 
   alias Catalyst.Actions
-  alias Catalyst.Execution
   alias Catalyst.Plugins.Mailer
 
   test "applies mailer plugin actions end to end", %{app_path: app_path} do
@@ -13,8 +12,7 @@ defmodule Catalyst.Plugins.MailerTest do
 
     actions =
       File.cd!(tmp_root, fn ->
-        Execution.new(
-          app_path: app_dir,
+        test_execution(app_dir,
           app_name: app_dir,
           app_module: "MyApp",
           otp_app: :my_app
@@ -22,7 +20,7 @@ defmodule Catalyst.Plugins.MailerTest do
         |> Mailer.run()
       end)
 
-    execution = Execution.new(app_path: app_dir, otp_app: :my_app)
+    execution = test_execution(app_dir, app_name: app_dir, app_module: "MyApp", otp_app: :my_app)
 
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
@@ -52,8 +50,7 @@ defmodule Catalyst.Plugins.MailerTest do
 
     actions =
       File.cd!(tmp_root, fn ->
-        Execution.new(
-          app_path: app_dir,
+        test_execution(app_dir,
           app_name: "My App",
           app_module: "MyApp",
           otp_app: :my_app
@@ -61,7 +58,7 @@ defmodule Catalyst.Plugins.MailerTest do
         |> Mailer.run()
       end)
 
-    execution = Execution.new(app_path: app_dir, app_name: "My App", otp_app: :my_app)
+    execution = test_execution(app_dir, app_name: "My App", app_module: "MyApp", otp_app: :my_app)
 
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
@@ -85,7 +82,7 @@ defmodule Catalyst.Plugins.MailerTest do
 
     result =
       File.cd!(tmp_root, fn ->
-        Mailer.post_validate(Execution.new(app_path: app_dir, app_module: "MyApp"), [])
+        Mailer.post_validate(test_execution(app_dir, app_module: "MyApp"), [])
       end)
 
     assert result == []

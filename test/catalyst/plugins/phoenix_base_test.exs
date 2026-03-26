@@ -1,13 +1,13 @@
 defmodule Catalyst.Plugins.PhoenixBaseTest do
-  use ExUnit.Case, async: true
+  use Catalyst.TestSupport.ProjectCase, async: true
 
   alias Catalyst.Actions
-  alias Catalyst.Execution
   alias Catalyst.Plugins.PhoenixBase
   alias Catalyst.ValidationAction
 
   test "converts keyword flags to phx.new argv" do
-    execution = Execution.new(app_path: "my_app", app_name: "My App")
+    execution =
+      test_execution("my_app", app_name: "My App", app_module: "MyApp", otp_app: :my_app)
 
     opts = [
       flags: [
@@ -43,7 +43,8 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
   end
 
   test "keeps backward compatibility with raw string flags" do
-    execution = Execution.new(app_path: "my_app", app_name: "My App")
+    execution =
+      test_execution("my_app", app_name: "My App", app_module: "MyApp", otp_app: :my_app)
 
     opts = [flags: ["--no-install", "--no-ecto", "--module", "MyApp"]]
 
@@ -54,7 +55,8 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
   end
 
   test "supports explicit no_* false as positive flag" do
-    execution = Execution.new(app_path: "my_app", app_name: "My App")
+    execution =
+      test_execution("my_app", app_name: "My App", app_module: "MyApp", otp_app: :my_app)
 
     opts = [flags: [no_install: false, no_ecto: false]]
 
@@ -65,7 +67,13 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
   end
 
   test "does not scaffold when targeting existing project" do
-    execution = Execution.new(app_path: "my_app", app_name: "My App", mode: :existing)
+    execution =
+      test_execution("my_app",
+        app_name: "My App",
+        app_module: "MyApp",
+        otp_app: :my_app,
+        mode: :existing
+      )
 
     opts = [flags: [install: false]]
 
@@ -75,7 +83,13 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
   end
 
   test "post_validate verifies phx.new/deps.get side effects in new mode" do
-    execution = Execution.new(app_path: "my_app", app_name: "My App", mode: :new)
+    execution =
+      test_execution("my_app",
+        app_name: "My App",
+        app_module: "MyApp",
+        otp_app: :my_app,
+        mode: :new
+      )
 
     validations = PhoenixBase.post_validate(execution, [])
 
@@ -91,7 +105,13 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
   end
 
   test "post_validate is empty in existing mode" do
-    execution = Execution.new(app_path: "my_app", app_name: "My App", mode: :existing)
+    execution =
+      test_execution("my_app",
+        app_name: "My App",
+        app_module: "MyApp",
+        otp_app: :my_app,
+        mode: :existing
+      )
 
     assert PhoenixBase.post_validate(execution, []) == []
   end

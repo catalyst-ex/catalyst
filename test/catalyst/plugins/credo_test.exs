@@ -4,12 +4,11 @@ defmodule Catalyst.Plugins.CredoTest do
   @moduletag setup_project: true
 
   alias Catalyst.Actions
-  alias Catalyst.Execution
   alias Catalyst.ValidationAction
   alias Catalyst.Plugins.Credo
 
   test "applies credo plugin actions end to end", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     actions =
       execution
@@ -32,7 +31,7 @@ defmodule Catalyst.Plugins.CredoTest do
   end
 
   test "post_validate returns required credo validation action" do
-    validations = Credo.post_validate(Execution.new(app_path: "."), [])
+    validations = Credo.post_validate(test_execution("."), [])
 
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
