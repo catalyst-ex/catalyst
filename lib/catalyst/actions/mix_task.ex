@@ -5,6 +5,9 @@ defmodule Catalyst.Actions.MixTask do
   defstruct [:name, :args, :env]
 
   def execute(%__MODULE__{name: task, args: args, env: env}, execution \\ Execution.new()) do
+    # For "mix new" and "mix phx.new", we set cd to nil so mix uses the
+    # shell’s current working dir. For all other tasks, we set cd to
+    # the app root so mix runs in the context of the app.
     cd =
       if task in ["new", "phx.new"] do
         nil
