@@ -97,7 +97,7 @@ defmodule Catalyst.PostValidationTest do
 
     output =
       capture_io(fn ->
-        assert :ok == Catalyst.build(config)
+        assert {:ok, _execution} = Catalyst.build(config)
       end)
 
     assert output =~ "Optional post-validations reported issues"
@@ -109,7 +109,7 @@ defmodule Catalyst.PostValidationTest do
 
     output =
       capture_io(fn ->
-        assert :ok == Catalyst.build(config)
+        assert {:ok, _execution} = Catalyst.build(config)
       end)
 
     assert output =~ "Optional post-validations reported issues"
@@ -124,7 +124,7 @@ defmodule Catalyst.PostValidationTest do
   test "post_validate reuses existing actions when possible" do
     config = config_with_plugins([ReuseExistingActionPlugin])
 
-    assert :ok == Catalyst.build(config)
+    assert {:ok, _execution} = Catalyst.build(config)
   end
 
   defp config_with_plugins(plugins) do

@@ -1,6 +1,8 @@
 defmodule Catalyst.TestSupport.ProjectCase do
   use ExUnit.CaseTemplate
 
+  alias Catalyst.Execution
+
   using opts do
     quote bind_quoted: [opts: opts] do
       use ExUnit.Case, opts
@@ -87,5 +89,26 @@ defmodule Catalyst.TestSupport.ProjectCase do
     """
     import Config
     """
+  end
+
+  def test_execution(app_path, opts \\ []) do
+    app_name = Keyword.get(opts, :app_name, "tmp")
+    app_module = Keyword.get(opts, :app_module, "Tmp")
+    otp_app = Keyword.get(opts, :otp_app, :tmp)
+    mode = Keyword.get(opts, :mode, :new)
+    plugins = Keyword.get(opts, :plugins, [])
+
+    config = %{
+      app: %{
+        path: app_path,
+        name: app_name,
+        module: app_module,
+        otp_app: otp_app
+      },
+      mode: mode,
+      plugins: plugins
+    }
+
+    Execution.new(config: config)
   end
 end

@@ -4,8 +4,8 @@ defmodule Catalyst.Plugins.Mailer do
 
   @impl true
   def run(execution, _opts \\ []) do
-    app_module = Module.concat([execution.app_module, "Mailer"])
-    app_path = execution.app_path
+    app_module = Module.concat([Execution.app_module(execution), "Mailer"])
+    app_path = Execution.app_path(execution)
     otp_app = Execution.otp_app(execution)
 
     [

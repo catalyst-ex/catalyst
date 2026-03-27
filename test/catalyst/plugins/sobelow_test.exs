@@ -4,12 +4,11 @@ defmodule Catalyst.Plugins.SobelowTest do
   @moduletag setup_project: true
 
   alias Catalyst.Actions
-  alias Catalyst.Execution
   alias Catalyst.ValidationAction
   alias Catalyst.Plugins.Sobelow
 
   test "applies sobelow plugin actions end to end", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
     gitignore = Path.join(app_path, ".gitignore")
     File.write!(gitignore, "_build\n")
 
@@ -37,7 +36,7 @@ defmodule Catalyst.Plugins.SobelowTest do
   end
 
   test "post_validate returns optional action when strict mode is off" do
-    validations = Sobelow.post_validate(Execution.new(app_path: "."), [])
+    validations = Sobelow.post_validate(test_execution("."), [])
 
     assert [%ValidationAction{} = validation] = validations
     refute validation.required
@@ -45,7 +44,7 @@ defmodule Catalyst.Plugins.SobelowTest do
   end
 
   test "post_validate returns required action when strict mode is on" do
-    validations = Sobelow.post_validate(Execution.new(app_path: "."), strict_post_validate: true)
+    validations = Sobelow.post_validate(test_execution("."), strict_post_validate: true)
 
     assert [%ValidationAction{} = validation] = validations
     assert validation.required

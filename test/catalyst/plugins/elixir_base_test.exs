@@ -1,11 +1,11 @@
 defmodule Catalyst.Plugins.ElixirBaseTest do
-  use ExUnit.Case, async: true
+  use Catalyst.TestSupport.ProjectCase, async: true
   alias Catalyst.Plugins.ElixirBase
   alias Catalyst.Actions
-  alias Catalyst.Execution
 
   test "generates a standard OTP application" do
-    execution = Execution.new(app_path: "my_app", app_name: "my_app")
+    execution =
+      test_execution("my_app", app_name: "my_app", app_module: "MyApp", otp_app: :my_app)
 
     actions = ElixirBase.run(execution)
 
@@ -22,7 +22,8 @@ defmodule Catalyst.Plugins.ElixirBaseTest do
   end
 
   test "can disable supervision tree" do
-    execution = Execution.new(app_path: "simple_lib", app_name: "simple_lib")
+    execution =
+      test_execution("simple_lib", app_name: "simple_lib", app_module: "MyApp", otp_app: :my_app)
 
     actions = ElixirBase.run(execution, sup: false)
 
@@ -32,7 +33,13 @@ defmodule Catalyst.Plugins.ElixirBaseTest do
   end
 
   test "does not scaffold when targeting existing project" do
-    execution = Execution.new(app_path: "my_app", app_name: "my_app", mode: :existing)
+    execution =
+      test_execution("my_app",
+        app_name: "my_app",
+        app_module: "MyApp",
+        otp_app: :my_app,
+        mode: :existing
+      )
 
     actions = ElixirBase.run(execution)
 

@@ -7,7 +7,6 @@ defmodule Mix.Tasks.Catalyst.New do
   @shortdoc "Creates a new app from a configuration file"
 
   def run(args) do
-    # Parse args
     case args do
       [config_path] ->
         generate_from_config(config_path)
@@ -37,10 +36,12 @@ defmodule Mix.Tasks.Catalyst.New do
     end
 
     # Build the app
-    Catalyst.build(config)
+    {:ok, _execution} = Catalyst.build(config)
 
     CLI.success("Done! Catalyst finished in #{Path.expand(config.app.path)}")
   end
+
+  # -- Helpers --
 
   defp ensure_existing_project!(path) do
     unless File.exists?(path) do

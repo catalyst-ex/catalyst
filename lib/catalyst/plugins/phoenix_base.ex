@@ -1,15 +1,16 @@
 defmodule Catalyst.Plugins.PhoenixBase do
   use Catalyst.Plugin
   alias Catalyst.Error
+  alias Catalyst.Execution
 
   @impl true
   def run(execution, opts \\ []) do
-    if execution.mode == :existing do
+    if Execution.mode(execution) == :existing do
       []
     else
       flags = opts |> Keyword.get(:flags, []) |> flags_to_argv()
-      app_path = execution.app_path
-      app_name = execution.app_name || execution.app_path
+      app_path = Execution.app_path(execution)
+      app_name = Execution.app_name(execution) || app_path
 
       [
         %Actions.MixTask{name: "phx.new", args: [app_path | flags]},
@@ -24,7 +25,7 @@ defmodule Catalyst.Plugins.PhoenixBase do
 
   @impl true
   def post_validate(execution, _opts) do
-    if execution.mode == :existing do
+    if Execution.mode(execution) == :existing do
       []
     else
       [
@@ -40,7 +41,7 @@ defmodule Catalyst.Plugins.PhoenixBase do
   end
 
   def validate_scaffolded_project!(execution) do
-    app_root = Catalyst.Execution.app_root(execution)
+    app_root = Execution.app_root(execution)
     mix_file = Path.join(app_root, "mix.exs")
     lock_file = Path.join(app_root, "mix.lock")
 

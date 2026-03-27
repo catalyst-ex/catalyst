@@ -5,7 +5,6 @@ defmodule Catalyst.Actions.AddDependencyTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
-  alias Catalyst.Execution
 
   test "AddDependency exposes expected keys" do
     expected_keys = [:__struct__, :name, :opts, :version] |> Enum.sort()
@@ -29,7 +28,7 @@ defmodule Catalyst.Actions.AddDependencyTest do
   end
 
   test "AddDependency updates project source end to end", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     action =
       struct(Actions.AddDependency,
@@ -48,7 +47,7 @@ defmodule Catalyst.Actions.AddDependencyTest do
   end
 
   test "AddDependency does not duplicate dependency when applied twice", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     action =
       struct(Actions.AddDependency,

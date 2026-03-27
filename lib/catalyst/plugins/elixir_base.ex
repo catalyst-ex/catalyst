@@ -1,15 +1,16 @@
 defmodule Catalyst.Plugins.ElixirBase do
   use Catalyst.Plugin
+  alias Catalyst.Execution
 
   @impl true
   def run(execution, opts \\ []) do
-    if execution.mode == :existing do
+    if Execution.mode(execution) == :existing do
       []
     else
       # Default to creating a supervision tree (--sup) unless explicitly disabled
       flags = if opts[:sup] == false, do: [], else: ["--sup"]
-      app_path = execution.app_path
-      app_name = execution.app_name || execution.app_path
+      app_path = Execution.app_path(execution)
+      app_name = Execution.app_name(execution) || app_path
 
       [
         %Actions.MixTask{name: "new", args: [app_path] ++ flags},

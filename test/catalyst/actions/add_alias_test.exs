@@ -7,7 +7,6 @@ defmodule Catalyst.Actions.AddAliasTest do
 
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
-  alias Catalyst.Execution
 
   test "AddAlias exposes expected keys" do
     expected_keys = [:__struct__, :commands, :key] |> Enum.sort()
@@ -29,7 +28,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   end
 
   test "AddAlias updates project source end to end", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     action =
       struct(Actions.AddAlias,
@@ -47,7 +46,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   test "AddAlias does not duplicate commands under quality when applied twice", %{
     app_path: app_path
   } do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     action =
       struct(Actions.AddAlias,
@@ -67,7 +66,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   end
 
   test "AddAlias warns and skips when requested commands already exist", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     action =
       struct(Actions.AddAlias,
@@ -87,7 +86,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   end
 
   test "AddAlias does not duplicate commands for other aliases", %{app_path: app_path} do
-    execution = Execution.new(app_path: app_path)
+    execution = test_execution(app_path)
 
     action =
       struct(Actions.AddAlias,
