@@ -56,6 +56,8 @@ defmodule Catalyst.PluginPlanner do
   defp collect_plugin_actions(plugin_mod, execution, opts) do
     plugin_actions = plugin_mod.run(execution, opts)
 
+    # validate plugin actions are properly formed and tag them with plugin metadata
+    # for later processing in the validation pipeline
     validation_actions =
       plugin_mod.post_validate(execution, opts)
       |> Enum.map(fn

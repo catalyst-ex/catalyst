@@ -16,7 +16,7 @@ defmodule Catalyst do
     {execution, action_entries, post_validations} =
       PluginPlanner.collect(config.plugins, execution)
 
-    # execute collected run actions, then post validations
+    # execute collected run actions
     {execution, executed_actions} = ActionRunner.run(action_entries, execution)
 
     # execute post-validations
