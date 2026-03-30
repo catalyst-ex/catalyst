@@ -139,6 +139,27 @@ defmodule Catalyst.ExecutionStateTest do
     assert error.context.plugin_run.error =~ "boom in post_validate"
   end
 
+  test "accepts plugin specs as module, single-tuple, and tuple-with-opts" do
+    config =
+      config_with_plugins([
+        ActionRecordingPlugin,
+        {ActionRecordingPlugin},
+        {ActionRecordingPlugin, marker: :ok}
+      ])
+
+    assert {:ok, %Execution{} = execution} = Catalyst.build(config)
+
+    assert length(execution.plugin_runs) == 3
+
+    assert Enum.map(execution.plugin_runs, & &1.plugin) == [
+             ActionRecordingPlugin,
+             ActionRecordingPlugin,
+             ActionRecordingPlugin
+           ]
+
+    assert Enum.map(execution.plugin_runs, & &1.opts) == [[], [], [marker: :ok]]
+  end
+
   defp config_with_plugins(plugins) do
     %{
       app: %{
