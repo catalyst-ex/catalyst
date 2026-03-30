@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Catalyst.New do
   use Mix.Task
   alias Catalyst.CLI
   alias Catalyst.Config.Loader
-  alias Catalyst.Error
+  alias Catalyst.Errors.CLIError
 
   @shortdoc "Creates a new app from a configuration file"
 
@@ -12,9 +12,8 @@ defmodule Mix.Tasks.Catalyst.New do
         generate_from_config(config_path)
 
       _ ->
-        raise Error,
-          code: :invalid_cli_args,
-          reason: :usage,
+        raise CLIError,
+          reason: :invalid_cli_args,
           context: %{args: args}
     end
   end
@@ -45,27 +44,24 @@ defmodule Mix.Tasks.Catalyst.New do
 
   defp ensure_existing_project!(path) do
     unless File.exists?(path) do
-      raise Error,
-        code: :missing_existing_project,
-        reason: :not_found,
+      raise CLIError,
+        reason: :missing_existing_project,
         context: %{path: path}
     end
 
     mix_file = Path.join(path, "mix.exs")
 
     unless File.exists?(mix_file) do
-      raise Error,
-        code: :invalid_existing_project,
-        reason: :missing_mix_file,
+      raise CLIError,
+        reason: :invalid_existing_project,
         context: %{path: path, mix_file: mix_file}
     end
   end
 
   defp ensure_new_project_target!(path) do
     if File.exists?(path) do
-      raise Error,
-        code: :target_path_exists,
-        reason: :already_exists,
+      raise CLIError,
+        reason: :target_path_exists,
         context: %{path: path}
     end
   end

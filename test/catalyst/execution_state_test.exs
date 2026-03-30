@@ -6,6 +6,7 @@ defmodule Catalyst.ExecutionStateTest do
   alias Catalyst.ActionExecution
   alias Catalyst.Actions
   alias Catalyst.Execution
+  alias Catalyst.Errors.PluginError
   alias Catalyst.ValidationAction
 
   defmodule ActionRecordingPlugin do
@@ -110,11 +111,11 @@ defmodule Catalyst.ExecutionStateTest do
     config = config_with_plugins([FailingRunPlugin])
 
     error =
-      assert_raise Catalyst.Error, fn ->
+      assert_raise PluginError, fn ->
         Catalyst.build(config)
       end
 
-    assert error.code == :plugin_execution_failed
+    assert error.reason == :plugin_execution_failed
     assert error.context.plugin_run.plugin == FailingRunPlugin
     assert error.context.plugin_run.status == :error
     assert error.context.plugin_run.actions_count == 0
@@ -126,11 +127,11 @@ defmodule Catalyst.ExecutionStateTest do
     config = config_with_plugins([FailingPostValidatePlugin])
 
     error =
-      assert_raise Catalyst.Error, fn ->
+      assert_raise PluginError, fn ->
         Catalyst.build(config)
       end
 
-    assert error.code == :plugin_execution_failed
+    assert error.reason == :plugin_execution_failed
     assert error.context.plugin_run.plugin == FailingPostValidatePlugin
     assert error.context.plugin_run.status == :error
     assert error.context.plugin_run.actions_count == 0

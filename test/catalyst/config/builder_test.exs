@@ -3,7 +3,7 @@ defmodule Catalyst.Config.BuilderTest do
 
   alias Catalyst.Config
   alias Catalyst.Config.Builder
-  alias Catalyst.Error
+  alias Catalyst.Errors.ConfigError
 
   test "builds config in :new mode with explicit app identity fields" do
     config =
@@ -59,7 +59,7 @@ defmodule Catalyst.Config.BuilderTest do
   end
 
   test "rejects config when app.name is missing" do
-    assert_raise Error, ~r/app.name is missing/, fn ->
+    assert_raise ConfigError, ~r/app.name is missing/, fn ->
       Builder.build!(%{
         mode: :new,
         app: %{path: "my_app", module: "MyApp", otp_app: :my_app},
@@ -69,7 +69,7 @@ defmodule Catalyst.Config.BuilderTest do
   end
 
   test "rejects config when otp_app cannot be derived" do
-    assert_raise Error, ~r/app.otp_app is missing/, fn ->
+    assert_raise ConfigError, ~r/app.otp_app is missing/, fn ->
       Builder.build!(%{
         mode: :new,
         app: %{name: "___", path: "___", module: "MyApp"},
@@ -79,7 +79,7 @@ defmodule Catalyst.Config.BuilderTest do
   end
 
   test "rejects invalid mode" do
-    assert_raise Error, ~r/mode must be one of/, fn ->
+    assert_raise ConfigError, ~r/mode must be one of/, fn ->
       Builder.build!(%Config{
         mode: :patch,
         app: %Config.App{path: "my_app", name: "my_app", module: "MyApp"},

@@ -1,7 +1,7 @@
 defmodule Catalyst.ErrorMessages do
   @moduledoc false
 
-  def message(code, context \\ %{})
+  def message(reason, context \\ %{})
 
   def message(:config_file_not_found, %{file_path: file_path}),
     do: "Configuration file not found: #{file_path}"
@@ -89,5 +89,5 @@ defmodule Catalyst.ErrorMessages do
     "Post-validation failed in #{plugins} for #{inspect(validation.action)}:\n\n#{to_string(reason)}"
   end
 
-  def message(code, _context), do: "Catalyst error (#{inspect(code)})"
+  def message(reason, _context), do: "Catalyst error (#{inspect(reason)})"
 end

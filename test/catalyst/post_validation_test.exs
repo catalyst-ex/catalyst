@@ -4,7 +4,7 @@ defmodule Catalyst.PostValidationTest do
   import ExUnit.CaptureIO
 
   alias Catalyst.Actions
-  alias Catalyst.Error
+  alias Catalyst.Errors.ValidationError
   alias Catalyst.ValidationAction
 
   defmodule RequiredFailurePlugin do
@@ -87,7 +87,7 @@ defmodule Catalyst.PostValidationTest do
   test "required post-validation failure raises" do
     config = config_with_plugins([RequiredFailurePlugin])
 
-    assert_raise Error, ~r/Post-validation failed/, fn ->
+    assert_raise ValidationError, ~r/Post-validation failed/, fn ->
       Catalyst.build(config)
     end
   end

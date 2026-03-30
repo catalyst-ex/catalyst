@@ -1,6 +1,6 @@
 defmodule Catalyst.Actions.AddConfig do
   alias Catalyst.CLI
-  alias Catalyst.Error
+  alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
 
   defstruct [:app, :module, :opts]
@@ -13,9 +13,8 @@ defmodule Catalyst.Actions.AddConfig do
     CLI.info("Configuring: #{inspect(app)} #{if mod, do: inspect(mod)}")
 
     unless File.exists?(path) do
-      raise Error,
-        code: :file_not_found,
-        reason: :missing_config_file,
+      raise ActionError,
+        reason: :file_not_found,
         context: %{path: path}
     end
 

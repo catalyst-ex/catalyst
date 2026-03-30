@@ -1,6 +1,6 @@
 defmodule Catalyst.Config.Loader do
   alias Catalyst.Config.Builder
-  alias Catalyst.Error
+  alias Catalyst.Errors.ConfigError
 
   @doc """
   Reads an Elixir script file and expects it to return a config definition
@@ -9,9 +9,8 @@ defmodule Catalyst.Config.Loader do
   def load!(file_path) do
     # Verify file exists
     unless File.exists?(file_path) do
-      raise Error,
-        code: :config_file_not_found,
-        reason: :not_found,
+      raise ConfigError,
+        reason: :config_file_not_found,
         context: %{file_path: file_path}
     end
 

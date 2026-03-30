@@ -1,7 +1,7 @@
 defmodule Catalyst.PluginPlanner do
   @moduledoc false
 
-  alias Catalyst.Error
+  alias Catalyst.Errors.PluginError
   alias Catalyst.Execution
   alias Catalyst.ValidationAction
 
@@ -63,15 +63,13 @@ defmodule Catalyst.PluginPlanner do
           %{validation | plugins: [plugin_mod]}
 
         %ValidationAction{action: action} ->
-          raise Error,
-            code: :invalid_validation_action,
-            reason: :invalid_action,
+          raise PluginError,
+            reason: :invalid_validation_action,
             context: %{plugin: plugin_mod, action: action}
 
         invalid ->
-          raise Error,
-            code: :invalid_post_validate_item,
-            reason: :invalid_validation_item,
+          raise PluginError,
+            reason: :invalid_post_validate_item,
             context: %{plugin: plugin_mod, item: invalid}
       end)
 
@@ -86,24 +84,21 @@ defmodule Catalyst.PluginPlanner do
   defp normalize_plugin_spec!(plugin_mod) when is_atom(plugin_mod), do: {plugin_mod, []}
 
   defp normalize_plugin_spec!(invalid) do
-    raise Error,
-      code: :invalid_plugin_spec,
-      reason: :invalid_plugin_entry,
+    raise PluginError,
+      reason: :invalid_plugin_spec,
       context: %{plugin_spec: invalid}
   end
 
-  defp reraise_with_plugin_failure(%Error{} = error, plugin_run) do
-    raise Error,
-      code: error.code,
+  defp reraise_with_plugin_failure(%PluginError{} = error, plugin_run) do
+    raise PluginError,
       reason: error.reason,
       message: error.message,
       context: Map.put(error.context || %{}, :plugin_run, plugin_run)
   end
 
   defp reraise_with_plugin_failure(error, plugin_run) do
-    raise Error,
-      code: :plugin_execution_failed,
-      reason: :plugin_failed,
+    raise PluginError,
+      reason: :plugin_execution_failed,
       context: %{plugin_run: plugin_run, error: Exception.message(error)}
   end
 end

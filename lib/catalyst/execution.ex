@@ -1,7 +1,7 @@
 defmodule Catalyst.Execution do
   @moduledoc false
 
-  alias Catalyst.Error
+  alias Catalyst.Errors.ExecutionError
 
   defstruct [
     :config,
@@ -70,8 +70,7 @@ defmodule Catalyst.Execution do
     do: resolve_path(execution, Path.join("config", "config.exs"))
 
   defp fetch!(%__MODULE__{config: nil}, _path, _reason) do
-    raise Error,
-      code: :missing_execution_config,
+    raise ExecutionError,
       reason: :missing_execution_config,
       context: %{}
   end
@@ -91,14 +90,12 @@ defmodule Catalyst.Execution do
 
     case value do
       :missing ->
-        raise Error,
-          code: :invalid_execution_config,
+        raise ExecutionError,
           reason: reason,
           context: %{path: path}
 
       nil ->
-        raise Error,
-          code: :invalid_execution_config,
+        raise ExecutionError,
           reason: reason,
           context: %{path: path}
 

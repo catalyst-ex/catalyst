@@ -1,6 +1,6 @@
 defmodule Catalyst.Actions.SystemCommand do
   alias Catalyst.CLI
-  alias Catalyst.Error
+  alias Catalyst.Errors.ActionError
 
   defstruct [:cmd, :args, :env, :cd]
 
@@ -26,9 +26,8 @@ defmodule Catalyst.Actions.SystemCommand do
           CLI.debug(error)
           :ok
         else
-          raise Error,
-            code: :command_failed,
-            reason: :nonzero_exit,
+          raise ActionError,
+            reason: :command_failed,
             context: %{cmd: cmd, args: args, exit_code: code, output: error}
         end
     end

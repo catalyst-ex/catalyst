@@ -4,8 +4,8 @@ defmodule Catalyst.ValidationPipeline do
   alias Catalyst.ActionExecution
   alias Catalyst.Actions
   alias Catalyst.Actions.Executor
-  alias Catalyst.Error
   alias Catalyst.Execution
+  alias Catalyst.Errors.ValidationError
   alias Catalyst.ValidationAction
 
   def run(validations, existing_actions, execution) do
@@ -90,9 +90,8 @@ defmodule Catalyst.ValidationPipeline do
           execution_acc = Execution.record_action_execution(execution_acc, action_execution)
 
           if validation.required do
-            raise Error,
-              code: :post_validation_failed,
-              reason: :required_validation_failed,
+            raise ValidationError,
+              reason: :post_validation_failed,
               context: %{validation: validation, error: Exception.message(reason)}
           else
             {[message | warnings], execution_acc}

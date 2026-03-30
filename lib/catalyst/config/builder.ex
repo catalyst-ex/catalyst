@@ -1,6 +1,6 @@
 defmodule Catalyst.Config.Builder do
   alias Catalyst.Config
-  alias Catalyst.Error
+  alias Catalyst.Errors.ConfigError
 
   @allowed_modes [:new, :existing]
 
@@ -27,9 +27,8 @@ defmodule Catalyst.Config.Builder do
   end
 
   def build!(other) do
-    raise Error,
-      code: :invalid_config_type,
-      reason: :invalid_type,
+    raise ConfigError,
+      reason: :invalid_config_type,
       context: %{value: other}
   end
 
@@ -47,9 +46,8 @@ defmodule Catalyst.Config.Builder do
   end
 
   defp to_app_struct(other) do
-    raise Error,
-      code: :invalid_app_config_type,
-      reason: :invalid_type,
+    raise ConfigError,
+      reason: :invalid_app_config_type,
       context: %{value: other}
   end
 
@@ -91,39 +89,33 @@ defmodule Catalyst.Config.Builder do
   defp validate!(%Config{} = config) do
     cond do
       config.mode not in @allowed_modes ->
-        raise Error,
-          code: :invalid_mode,
-          reason: :validation_error,
+        raise ConfigError,
+          reason: :invalid_mode,
           context: %{mode: config.mode, allowed_modes: @allowed_modes}
 
       is_nil(config.app.path) ->
-        raise Error,
-          code: :missing_app_path,
-          reason: :validation_error,
+        raise ConfigError,
+          reason: :missing_app_path,
           context: %{field: :app_path}
 
       is_nil(config.app.name) ->
-        raise Error,
-          code: :missing_app_name,
-          reason: :validation_error,
+        raise ConfigError,
+          reason: :missing_app_name,
           context: %{field: :app_name}
 
       is_nil(config.app.module) ->
-        raise Error,
-          code: :missing_app_module,
-          reason: :validation_error,
+        raise ConfigError,
+          reason: :missing_app_module,
           context: %{field: :app_module}
 
       is_nil(config.app.otp_app) ->
-        raise Error,
-          code: :missing_otp_app,
-          reason: :validation_error,
+        raise ConfigError,
+          reason: :missing_otp_app,
           context: %{field: :otp_app}
 
       !is_list(config.plugins) ->
-        raise Error,
-          code: :invalid_plugins,
-          reason: :validation_error,
+        raise ConfigError,
+          reason: :invalid_plugins,
           context: %{plugins: config.plugins}
 
       true ->

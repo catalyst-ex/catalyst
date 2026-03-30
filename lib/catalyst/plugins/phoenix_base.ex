@@ -1,7 +1,7 @@
 defmodule Catalyst.Plugins.PhoenixBase do
   use Catalyst.Plugin
-  alias Catalyst.Error
   alias Catalyst.Execution
+  alias Catalyst.Errors.PluginError
 
   @impl true
   def run(execution, opts \\ []) do
@@ -47,15 +47,13 @@ defmodule Catalyst.Plugins.PhoenixBase do
 
     cond do
       not File.exists?(mix_file) ->
-        raise Error,
-          code: :phx_scaffold_missing,
-          reason: :missing_mix_file,
+        raise PluginError,
+          reason: :phx_scaffold_missing,
           context: %{path: mix_file}
 
       not File.exists?(lock_file) ->
-        raise Error,
-          code: :deps_lock_missing,
-          reason: :missing_lock_file,
+        raise PluginError,
+          reason: :deps_lock_missing,
           context: %{path: lock_file}
 
       true ->
