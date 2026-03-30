@@ -3,8 +3,8 @@ defmodule Catalyst.Actions.AddDependencyTest do
 
   @moduletag setup_project: true
 
-  alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Actions
 
   test "AddDependency exposes expected keys" do
     expected_keys = [:__struct__, :name, :opts, :version] |> Enum.sort()

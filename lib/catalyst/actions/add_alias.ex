@@ -1,4 +1,6 @@
 defmodule Catalyst.Actions.AddAlias do
+  use Catalyst.Action
+
   alias Catalyst.CLI
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
@@ -6,7 +8,8 @@ defmodule Catalyst.Actions.AddAlias do
 
   defstruct [:key, :commands]
 
-  def execute(%__MODULE__{} = action, execution \\ Execution.new()) do
+  @impl true
+  def run(%__MODULE__{} = action, execution \\ Execution.new()) do
     path = Execution.mix_file(execution)
 
     CLI.info("Adding alias: #{action.key}")

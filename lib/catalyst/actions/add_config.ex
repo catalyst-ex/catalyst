@@ -1,11 +1,14 @@
 defmodule Catalyst.Actions.AddConfig do
+  use Catalyst.Action
+
   alias Catalyst.CLI
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
 
   defstruct [:app, :module, :opts]
 
-  def execute(%__MODULE__{} = action, execution \\ Execution.new()) do
+  @impl true
+  def run(%__MODULE__{} = action, execution \\ Execution.new()) do
     path = Execution.config_file(execution)
     app = action.app || Execution.otp_app(execution)
     mod = action.module

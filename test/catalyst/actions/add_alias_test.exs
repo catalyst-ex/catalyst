@@ -5,8 +5,8 @@ defmodule Catalyst.Actions.AddAliasTest do
 
   import ExUnit.CaptureIO
 
-  alias Catalyst.Actions
   alias Catalyst.Actions.Executor
+  alias Catalyst.Actions
 
   test "AddAlias exposes expected keys" do
     expected_keys = [:__struct__, :commands, :key] |> Enum.sort()

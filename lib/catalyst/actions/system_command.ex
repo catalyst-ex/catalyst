@@ -1,10 +1,13 @@
 defmodule Catalyst.Actions.SystemCommand do
+  use Catalyst.Action
+
   alias Catalyst.CLI
   alias Catalyst.Errors.ActionError
 
   defstruct [:cmd, :args, :env, :cd]
 
-  def execute(%__MODULE__{cmd: cmd, args: args, env: env, cd: cd}, _execution \\ nil) do
+  @impl true
+  def run(%__MODULE__{cmd: cmd, args: args, env: env, cd: cd}, _execution \\ nil) do
     args = args || []
     env = env || []
     opts = [stderr_to_stdout: true, env: env]

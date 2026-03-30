@@ -3,6 +3,7 @@ defmodule Catalyst.Plugins.MailerTest do
 
   @moduletag setup_project: true
 
+  alias Catalyst.Actions.Executor
   alias Catalyst.Actions
   alias Catalyst.Plugins.Mailer
 
@@ -25,7 +26,7 @@ defmodule Catalyst.Plugins.MailerTest do
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
         %Actions.MixTask{} -> :ok
-        action -> Actions.Executor.run(action, execution)
+        action -> Executor.run(action, execution)
       end)
     end)
 
@@ -63,7 +64,7 @@ defmodule Catalyst.Plugins.MailerTest do
     File.cd!(tmp_root, fn ->
       Enum.each(actions, fn
         %Actions.MixTask{} -> :ok
-        action -> Actions.Executor.run(action, execution)
+        action -> Executor.run(action, execution)
       end)
     end)
 

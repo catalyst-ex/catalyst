@@ -3,6 +3,7 @@ defmodule Catalyst.Plugins.CredoTest do
 
   @moduletag setup_project: true
 
+  alias Catalyst.Actions.Executor
   alias Catalyst.Actions
   alias Catalyst.ValidationAction
   alias Catalyst.Plugins.Credo
@@ -16,7 +17,7 @@ defmodule Catalyst.Plugins.CredoTest do
 
     Enum.each(actions, fn
       %Actions.MixTask{} -> :ok
-      action -> Actions.Executor.run(action, execution)
+      action -> Executor.run(action, execution)
     end)
 
     mix_exs = Path.join(app_path, "mix.exs")
