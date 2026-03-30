@@ -27,15 +27,16 @@ catalyst/
 ├── lib/
 │   ├── catalyst.ex                 # Main Pipeline
 │   ├── catalyst/
+│   │   ├── action.ex               # Action Behaviour
 │   │   ├── config.ex               # Configuration Structs
 │   │   ├── plugin.ex               # Plugin Behaviour
 │   │   ├── actions.ex              # Actions Type Contract
 │   │   ├── actions/
-│   │   │   ├── add_file.ex         # Action Struct
-│   │   │   ├── add_dependency.ex   # Action Struct
-│   │   │   ├── system_command.ex   # Action Struct
-│   │   │   └── executor.ex         # Side-effect Runner
-│   │   └── plugin/
+│   │   │   ├── add_file.ex         # Action Struct + Runner
+│   │   │   ├── add_dependency.ex   # Action Struct + Runner
+│   │   │   ├── system_command.ex   # Action Struct + Runner
+│   │   │   └── executor.ex         # Central Action Dispatcher
+│   │   └── plugins/
 │   │       └── phoenix_base.ex     # Core Generator Plugin 
 │   │       └── elixir_base.ex      # Core Generator Plugin
 │   └── mix/
