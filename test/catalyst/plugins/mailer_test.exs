@@ -32,7 +32,13 @@ defmodule Catalyst.Plugins.MailerTest do
 
     mix_source = File.read!(Path.join(app_path, "mix.exs"))
     config_source = File.read!(Path.join(app_path, "config/config.exs"))
-    mailer_source = File.read!(Path.join([app_path, "lib", app_dir, "mailer.ex"]))
+    mailer_source = File.read!(Path.join([app_path, "lib", app_dir <> "_mailer", "mailer.ex"]))
+    email_source = File.read!(Path.join([app_path, "lib", app_dir <> "_mailer", "email.ex"]))
+
+    default_layout_source =
+      File.read!(
+        Path.join([app_path, "lib", app_dir <> "_mailer", "layouts", "default_layout.ex"])
+      )
 
     assert mix_source =~ ~s(swoosh: "~> 1.16")
     assert config_source =~ "config(:my_app, MyApp.Mailer"
@@ -40,6 +46,13 @@ defmodule Catalyst.Plugins.MailerTest do
     assert config_source =~ "config(:swoosh, :api_client, false)"
     assert mailer_source =~ "defmodule Elixir.MyApp.Mailer do"
     assert mailer_source =~ "use Swoosh.Mailer, otp_app: :my_app"
+    assert email_source =~ "use MyAppWeb, :verified_routes"
+    assert email_source =~ "import MyApp.Mailer.Layouts.DefaultLayout"
+    assert email_source =~ "alias MyApp.Mailer"
+    assert email_source =~ "|> MyApp.Mailer.deliver!()"
+    refute email_source =~ "Catalyst"
+    assert default_layout_source =~ "defmodule MyApp.Mailer.Layouts.DefaultLayout do"
+    refute default_layout_source =~ "Catalyst"
 
     assert %Actions.MixTask{name: "deps.get"} =
              Enum.find(actions, &match?(%Actions.MixTask{}, &1))
@@ -69,7 +82,7 @@ defmodule Catalyst.Plugins.MailerTest do
     end)
 
     config_source = File.read!(Path.join(app_path, "config/config.exs"))
-    mailer_path = Path.join([app_path, "lib", app_dir, "mailer.ex"])
+    mailer_path = Path.join([app_path, "lib", app_dir <> "_mailer", "mailer.ex"])
 
     assert config_source =~ "config(:my_app, MyApp.Mailer"
     refute config_source =~ ~s(config(:"My App", MyApp.Mailer")
