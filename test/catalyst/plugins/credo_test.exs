@@ -24,8 +24,8 @@ defmodule Catalyst.Plugins.CredoTest do
     mix_source = File.read!(mix_exs)
 
     assert File.exists?(Path.join(app_path, ".credo.exs"))
-    assert mix_source =~ "{:credo, \"~> 1.7\", only: [:dev, :test], runtime: false}"
-    assert mix_source =~ "quality: [\"format\", \"credo\"]"
+    assert mix_source =~ ~s({:credo, "~> 1.7", only: [:dev, :test], runtime: false})
+    assert mix_source =~ ~s(quality: ["format", "credo"])
 
     assert %Actions.MixTask{name: "deps.get"} =
              Enum.find(actions, &match?(%Actions.MixTask{}, &1))

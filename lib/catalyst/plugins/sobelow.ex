@@ -6,7 +6,7 @@ defmodule Catalyst.Plugins.Sobelow do
     [
       %Actions.AddDependency{
         name: :sobelow,
-        version: "0.14.0",
+        version: "~> 0.14.0",
         opts: [only: [:dev, :test], runtime: false]
       },
       %Actions.AddAlias{

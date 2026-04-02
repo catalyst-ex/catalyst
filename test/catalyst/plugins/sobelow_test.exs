@@ -25,8 +25,8 @@ defmodule Catalyst.Plugins.SobelowTest do
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
 
-    assert mix_source =~ "{:sobelow, \"0.14.0\", only: [:dev, :test], runtime: false}"
-    assert mix_source =~ "quality: [\"format\", \"sobelow --exit low\"]"
+    assert mix_source =~ ~s({:sobelow, "~> 0.14.0", only: [:dev, :test], runtime: false})
+    assert mix_source =~ ~s(quality: ["format", "sobelow --exit low"])
 
     gitignore_source = File.read!(gitignore)
     assert gitignore_source =~ "# Sobelow Security Logs"

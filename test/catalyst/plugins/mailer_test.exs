@@ -34,7 +34,7 @@ defmodule Catalyst.Plugins.MailerTest do
     config_source = File.read!(Path.join(app_path, "config/config.exs"))
     mailer_source = File.read!(Path.join([app_path, "lib", app_dir, "mailer.ex"]))
 
-    assert mix_source =~ "swoosh: \"~> 1.16\""
+    assert mix_source =~ ~s(swoosh: "~> 1.16")
     assert config_source =~ "config(:my_app, MyApp.Mailer"
     assert config_source =~ "adapter: Swoosh.Adapters.Local"
     assert config_source =~ "config(:swoosh, :api_client, false)"
@@ -72,7 +72,7 @@ defmodule Catalyst.Plugins.MailerTest do
     mailer_path = Path.join([app_path, "lib", app_dir, "mailer.ex"])
 
     assert config_source =~ "config(:my_app, MyApp.Mailer"
-    refute config_source =~ "config(:\"My App\", MyApp.Mailer"
+    refute config_source =~ ~s(config(:"My App", MyApp.Mailer")
     assert File.exists?(mailer_path)
     refute File.exists?(Path.join([app_path, "lib", "My App", "mailer.ex"]))
   end

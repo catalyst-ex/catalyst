@@ -40,7 +40,7 @@ defmodule Catalyst.Actions.AddAliasTest do
 
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
-    assert mix_source =~ "quality: [\"format\", \"credo\"]"
+    assert mix_source =~ ~s(quality: ["format", "credo"])
   end
 
   test "AddAlias does not duplicate commands under quality when applied twice", %{

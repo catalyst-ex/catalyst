@@ -11,10 +11,10 @@ defmodule Catalyst.Actions.AppendFileTest do
   end
 
   test "AppendFile can be instantiated" do
-    action = struct(Actions.AppendFile, path: "README.md", content: "\nNew line")
+    action = struct(Actions.AppendFile, path: "README.md", content: ~s(\nNew line))
 
     assert %Actions.AppendFile{} = action
     assert action.path == "README.md"
-    assert action.content == "\nNew line"
+    assert action.content == ~s(\nNew line)
   end
 end

@@ -66,7 +66,7 @@ defmodule Catalyst.PostValidationTest do
       [
         %Actions.SystemCommand{
           cmd: "sh",
-          args: ["-c", "test \"$REUSE_OK\" = \"1\""],
+          args: ["-c", ~s(test "$REUSE_OK" = "1")],
           env: [{"REUSE_OK", "1"}]
         }
       ]
@@ -77,7 +77,7 @@ defmodule Catalyst.PostValidationTest do
       [
         %ValidationAction{
           # Missing env on purpose; this should still reuse the run action by command identity.
-          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", "test \"$REUSE_OK\" = \"1\""]},
+          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", ~s(test "$REUSE_OK" = "1")]},
           required: true
         }
       ]

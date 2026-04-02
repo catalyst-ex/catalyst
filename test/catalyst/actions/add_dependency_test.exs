@@ -42,8 +42,8 @@ defmodule Catalyst.Actions.AddDependencyTest do
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
     assert mix_source =~ ":plug"
-    assert mix_source =~ "\"~> 1.0\""
-    assert mix_source =~ "only: :dev"
+    assert mix_source =~ ~s("~> 1.0")
+    assert mix_source =~ ~s(only: :dev)
   end
 
   test "AddDependency does not duplicate dependency when applied twice", %{app_path: app_path} do

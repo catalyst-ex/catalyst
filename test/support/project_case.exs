@@ -51,22 +51,18 @@ defmodule Catalyst.TestSupport.ProjectCase do
         end
         """
       else
-        """
-        defp aliases do
-          []
-        end
-        """
+        ""
       end
 
-    """
+    ~s|
     defmodule TmpProject.MixProject do
       use Mix.Project
 
       def project do
         [
           app: :setup_project,
-          version: \"0.1.0\",
-          elixir: \"~> 1.15\",
+          version: "~> 0.1.0",
+          elixir: "~> 1.15",
           aliases: aliases(),
           deps: deps()
         ]
@@ -82,7 +78,7 @@ defmodule Catalyst.TestSupport.ProjectCase do
 
       #{aliases_source}
     end
-    """
+    |
   end
 
   def config_source do
