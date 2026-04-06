@@ -3,15 +3,18 @@ defmodule Catalyst.PluginPlanner do
 
   alias Catalyst.Errors.PluginError
   alias Catalyst.Execution
+  alias Catalyst.PluginOptionParser
   alias Catalyst.ValidationAction
 
   def collect(plugin_specs, execution) do
     plugin_specs
     |> Enum.reduce({execution, [], []}, fn plugin_spec,
                                            {execution_acc, actions_acc, validations_acc} ->
-      {plugin_mod, opts} = normalize_plugin_spec!(plugin_spec)
+      {plugin_mod, raw_opts} = normalize_plugin_spec!(plugin_spec)
 
       try do
+        opts = PluginOptionParser.validate!(plugin_mod, raw_opts, execution_acc.config)
+
         {plugin_actions, validation_actions} =
           collect_plugin_actions(plugin_mod, execution_acc, opts)
 
@@ -35,7 +38,7 @@ defmodule Catalyst.PluginPlanner do
         error ->
           plugin_run = %{
             plugin: plugin_mod,
-            opts: opts,
+            opts: raw_opts,
             status: :error,
             actions_count: 0,
             validations_count: 0,

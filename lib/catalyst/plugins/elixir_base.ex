@@ -3,6 +3,11 @@ defmodule Catalyst.Plugins.ElixirBase do
   alias Catalyst.Execution
 
   @impl true
+  def opts_schema do
+    [sup: [type: :boolean, default: true]]
+  end
+
+  @impl true
   def run(execution, opts \\ []) do
     if Execution.mode(execution) == :existing do
       []

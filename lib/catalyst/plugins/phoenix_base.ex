@@ -4,6 +4,14 @@ defmodule Catalyst.Plugins.PhoenixBase do
   alias Catalyst.Errors.PluginError
 
   @impl true
+  def opts_schema do
+    [
+      phoenix: [type: :string],
+      flags: [type: {:one_of, [:list, :map]}, default: []]
+    ]
+  end
+
+  @impl true
   def run(execution, opts \\ []) do
     if Execution.mode(execution) == :existing do
       []

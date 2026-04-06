@@ -2,6 +2,11 @@ defmodule Catalyst.Plugins.Sobelow do
   use Catalyst.Plugin
 
   @impl true
+  def opts_schema do
+    [strict_post_validate: [type: :boolean, default: false]]
+  end
+
+  @impl true
   def run(_execution, _opts \\ []) do
     [
       %Actions.AddDependency{
