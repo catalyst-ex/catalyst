@@ -65,6 +65,15 @@ defmodule Catalyst.ErrorMessages do
     do:
       "Invalid plugin entry: #{inspect(plugin_spec)}. Expected module, {module}, or {module, keyword_opts}."
 
+  def message(:invalid_plugin_opts, %{plugin: plugin} = context) do
+    detail =
+      context
+      |> Map.drop([:plugin])
+      |> inspect(pretty: true)
+
+    "Invalid plugin options for #{inspect(plugin)}:\n\n#{detail}"
+  end
+
   def message(:missing_execution_config, _),
     do: "Execution config is missing. Build execution from config via Execution.from_config/1."
 

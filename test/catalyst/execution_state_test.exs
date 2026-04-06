@@ -13,6 +13,11 @@ defmodule Catalyst.ExecutionStateTest do
     use Catalyst.Plugin
 
     @impl true
+    def opts_schema do
+      [marker: [type: :atom]]
+    end
+
+    @impl true
     def run(_execution, _opts) do
       [
         %Actions.Function{
@@ -158,6 +163,33 @@ defmodule Catalyst.ExecutionStateTest do
            ]
 
     assert Enum.map(execution.plugin_runs, & &1.opts) == [[], [], [marker: :ok]]
+  end
+
+  test "rejects unknown plugin options" do
+    config = config_with_plugins([{ActionRecordingPlugin, unknown: true}])
+
+    error =
+      assert_raise PluginError, fn ->
+        Catalyst.build(config)
+      end
+
+    assert error.reason == :invalid_plugin_opts
+    assert error.context.plugin == ActionRecordingPlugin
+    assert error.context.unknown_keys == [:unknown]
+  end
+
+  test "rejects plugin options with invalid type" do
+    config = config_with_plugins([{ActionRecordingPlugin, marker: "ok"}])
+
+    error =
+      assert_raise PluginError, fn ->
+        Catalyst.build(config)
+      end
+
+    assert error.reason == :invalid_plugin_opts
+    assert error.context.plugin == ActionRecordingPlugin
+    assert error.context.option == :marker
+    assert error.context.expected_type == :atom
   end
 
   defp config_with_plugins(plugins) do
