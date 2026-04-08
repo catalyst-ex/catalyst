@@ -20,6 +20,6 @@ defmodule Catalyst.Actions.MixTask do
         Execution.app_root(execution)
       end
 
-    SystemCommand.run(type: SystemCommand, cmd: "mix", args: [task | args], env: env, cd: cd)
+    SystemCommand.run(cmd: "mix", args: [task | args], env: env, cd: cd)
   end
 end

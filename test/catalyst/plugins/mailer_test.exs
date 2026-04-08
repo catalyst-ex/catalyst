@@ -47,7 +47,7 @@ defmodule Catalyst.Plugins.MailerTest do
     assert config_source =~ "config(:my_app, MyApp.Mailer"
     assert config_source =~ "adapter: Swoosh.Adapters.Local"
     assert config_source =~ "config(:swoosh, :api_client, false)"
-    assert mailer_source =~ "defmodule Elixir.MyApp.Mailer do"
+    assert mailer_source =~ "defmodule MyApp.Mailer do"
     assert mailer_source =~ "use Swoosh.Mailer, otp_app: :my_app"
     assert email_source =~ "use MyAppWeb, :verified_routes"
     assert email_source =~ "import MyApp.Mailer.Layouts.DefaultLayout"
