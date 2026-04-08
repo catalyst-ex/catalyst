@@ -64,8 +64,17 @@ defmodule Catalyst.PluginPlanner do
     validation_actions =
       plugin_mod.post_validate(execution, opts)
       |> Enum.map(fn
-        %ValidationAction{action: %{__struct__: _}} = validation ->
-          %{validation | plugins: [plugin_mod]}
+        %ValidationAction{action: {mod, action_opts}} = validation
+        when is_atom(mod) and is_list(action_opts) ->
+          Code.ensure_loaded?(mod)
+
+          if function_exported?(mod, :run, 2) do
+            %{validation | plugins: [plugin_mod]}
+          else
+            raise PluginError,
+              reason: :invalid_validation_action,
+              context: %{plugin: plugin_mod, action: {mod, action_opts}}
+          end
 
         %ValidationAction{action: action} ->
           raise PluginError,

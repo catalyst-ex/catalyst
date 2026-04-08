@@ -15,17 +15,20 @@ defmodule Catalyst.Plugins.StylerTest do
       execution
       |> Styler.run()
 
-    Enum.each(actions, fn
-      %Actions.MixTask{} -> :ok
-      action -> Executor.run(action, execution)
+    Enum.each(actions, fn action ->
+      if match?({Actions.MixTask, _}, action) do
+        :ok
+      else
+        Executor.run(action, execution)
+      end
     end)
 
     mix_source = File.read!(Path.join(app_path, "mix.exs"))
 
     assert mix_source =~ ~s({:styler, "~> 1.11", only: [:dev, :test], runtime: false})
 
-    assert %Actions.MixTask{name: "deps.get"} =
-             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+    assert {Actions.MixTask, deps_opts} = Enum.find(actions, &match?({Actions.MixTask, _}, &1))
+    assert Keyword.get(deps_opts, :name) == "deps.get"
   end
 
   test "post_validate returns required formatting validation action" do
@@ -33,6 +36,8 @@ defmodule Catalyst.Plugins.StylerTest do
 
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
-    assert %Actions.MixTask{name: "format", args: ["--check-formatted"]} = validation.action
+    assert {Actions.MixTask, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :name) == "format"
+    assert Keyword.get(validation_opts, :args) == ["--check-formatted"]
   end
 end

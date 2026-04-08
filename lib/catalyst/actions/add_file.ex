@@ -4,10 +4,10 @@ defmodule Catalyst.Actions.AddFile do
   alias Catalyst.CLI
   alias Catalyst.Execution
 
-  defstruct [:path, :content, :template_path]
-
   @impl true
-  def run(%__MODULE__{path: path, content: content}, execution \\ Execution.new()) do
+  def run(action, execution \\ Execution.new()) when is_list(action) do
+    path = Keyword.fetch!(action, :path)
+    content = Keyword.fetch!(action, :content)
     resolved_path = Execution.resolve_path(execution, path)
 
     CLI.info("Creating file: #{resolved_path}")

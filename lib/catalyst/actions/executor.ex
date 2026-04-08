@@ -8,14 +8,13 @@ defmodule Catalyst.Actions.Executor do
   @doc """
   Dispatches the action to the correct handler.
   """
-  def run(%{__struct__: mod} = action, execution) when is_atom(mod) do
-    # Ensure the module is loaded before checking for the run function
+  def run({mod, opts}, execution) when is_atom(mod) and is_list(opts) do
     Code.ensure_loaded?(mod)
 
     if function_exported?(mod, :run, 2) do
-      mod.run(action, execution)
+      mod.run(opts, execution)
     else
-      unknown_action!(action)
+      unknown_action!({mod, opts})
     end
   end
 

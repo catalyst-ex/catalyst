@@ -7,18 +7,13 @@ defmodule Catalyst.Plugins.Dotenvy do
   @impl true
   def run(execution, _opts \\ []) do
     [
-      %Actions.AddDependency{
-        name: :dotenvy,
-        version: "1.0.0",
-        opts: []
-      },
-      %Actions.MixTask{name: "deps.get"},
-      %Actions.Function{module: __MODULE__, function: :inject_runtime_config, args: [execution]},
-      %Actions.AddFile{
-        path: ".env.example",
-        content:
-          "# Example environment variables for Dotenvy\n# DATABASE_URL=ecto://postgres:postgres@localhost/my_app_dev\n"
-      }
+      {Actions.AddDependency, name: :dotenvy, version: "1.0.0", opts: []},
+      {Actions.MixTask, name: "deps.get"},
+      {Actions.Function, module: __MODULE__, function: :inject_runtime_config, args: [execution]},
+      {Actions.AddFile,
+       path: ".env.example",
+       content:
+         "# Example environment variables for Dotenvy\n# DATABASE_URL=ecto://postgres:postgres@localhost/my_app_dev\n"}
     ]
   end
 
@@ -26,11 +21,13 @@ defmodule Catalyst.Plugins.Dotenvy do
   def post_validate(execution, _opts) do
     [
       %Catalyst.ValidationAction{
-        action: %Actions.Function{
-          module: __MODULE__,
-          function: :validate_runtime_config!,
-          args: [execution]
-        },
+        action:
+          {Actions.Function,
+           [
+             module: __MODULE__,
+             function: :validate_runtime_config!,
+             args: [execution]
+           ]},
         required: true
       }
     ]

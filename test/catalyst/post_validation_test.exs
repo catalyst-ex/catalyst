@@ -17,7 +17,7 @@ defmodule Catalyst.PostValidationTest do
     def post_validate(_execution, _opts) do
       [
         %ValidationAction{
-          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", "exit 1"]},
+          action: {Actions.SystemCommand, cmd: "sh", args: ["-c", "exit 1"]},
           required: true
         }
       ]
@@ -34,7 +34,7 @@ defmodule Catalyst.PostValidationTest do
     def post_validate(_execution, _opts) do
       [
         %ValidationAction{
-          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", "exit 1"]},
+          action: {Actions.SystemCommand, cmd: "sh", args: ["-c", "exit 1"]},
           required: false
         }
       ]
@@ -51,7 +51,7 @@ defmodule Catalyst.PostValidationTest do
     def post_validate(_execution, _opts) do
       [
         %ValidationAction{
-          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", "exit 1"]},
+          action: {Actions.SystemCommand, cmd: "sh", args: ["-c", "exit 1"]},
           required: false
         }
       ]
@@ -64,10 +64,9 @@ defmodule Catalyst.PostValidationTest do
     @impl true
     def run(_execution, _opts) do
       [
-        %Actions.SystemCommand{
-          cmd: "sh",
-          args: ["-c", ~s(test "$REUSE_OK" = "1")],
-          env: [{"REUSE_OK", "1"}]
+        {
+          Actions.SystemCommand,
+          cmd: "sh", args: ["-c", ~s(test "$REUSE_OK" = "1")], env: [{"REUSE_OK", "1"}]
         }
       ]
     end
@@ -77,7 +76,7 @@ defmodule Catalyst.PostValidationTest do
       [
         %ValidationAction{
           # Missing env on purpose; this should still reuse the run action by command identity.
-          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", ~s(test "$REUSE_OK" = "1")]},
+          action: {Actions.SystemCommand, cmd: "sh", args: ["-c", ~s(test "$REUSE_OK" = "1")]},
           required: true
         }
       ]

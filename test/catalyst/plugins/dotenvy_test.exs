@@ -15,9 +15,12 @@ defmodule Catalyst.Plugins.DotenvyTest do
 
     actions = Dotenvy.run(execution)
 
-    Enum.each(actions, fn
-      %Actions.MixTask{} -> :ok
-      action -> Executor.run(action, execution)
+    Enum.each(actions, fn action ->
+      if match?({Actions.MixTask, _}, action) do
+        :ok
+      else
+        Executor.run(action, execution)
+      end
     end)
 
     mix_source = File.read!(Path.join(app_path, "mix.exs"))
@@ -27,11 +30,14 @@ defmodule Catalyst.Plugins.DotenvyTest do
     assert runtime_source =~ "import Dotenvy"
     assert runtime_source =~ ~S|source(["secrets/#{config_env()}.env", System.get_env()])|
 
-    assert %Actions.Function{module: Dotenvy, function: :inject_runtime_config} =
-             Enum.find(actions, &match?(%Actions.Function{}, &1))
+    assert {Actions.Function, inject_opts} =
+             Enum.find(actions, &match?({Actions.Function, _}, &1))
 
-    assert %Actions.MixTask{name: "deps.get"} =
-             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+    assert Keyword.get(inject_opts, :module) == Dotenvy
+    assert Keyword.get(inject_opts, :function) == :inject_runtime_config
+
+    assert {Actions.MixTask, deps_opts} = Enum.find(actions, &match?({Actions.MixTask, _}, &1))
+    assert Keyword.get(deps_opts, :name) == "deps.get"
   end
 
   test "does not duplicate runtime dotenvy lines when run multiple times", %{app_path: app_path} do
@@ -68,8 +74,9 @@ defmodule Catalyst.Plugins.DotenvyTest do
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
 
-    assert %Actions.Function{module: Dotenvy, function: :validate_runtime_config!} =
-             validation.action
+    assert {Actions.Function, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :module) == Dotenvy
+    assert Keyword.get(validation_opts, :function) == :validate_runtime_config!
   end
 
   test "validate_runtime_config! passes when runtime.exs has dotenvy statements", %{

@@ -14,9 +14,12 @@ defmodule Catalyst.Plugins.HammerTest do
 
     actions = Hammer.run(execution)
 
-    Enum.each(actions, fn
-      %Actions.MixTask{} -> :ok
-      action -> Executor.run(action, execution)
+    Enum.each(actions, fn action ->
+      if match?({Actions.MixTask, _}, action) do
+        :ok
+      else
+        Executor.run(action, execution)
+      end
     end)
 
     mix_source = File.read!(Path.join(app_path, "mix.exs"))
@@ -27,8 +30,8 @@ defmodule Catalyst.Plugins.HammerTest do
     assert rate_limiter_source =~ "use Hammer"
     assert rate_limiter_source =~ "rate_limit: {100, :minute}"
 
-    assert %Actions.MixTask{name: "deps.get"} =
-             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+    assert {Actions.MixTask, deps_opts} = Enum.find(actions, &match?({Actions.MixTask, _}, &1))
+    assert Keyword.get(deps_opts, :name) == "deps.get"
   end
 
   test "post_validate returns required rate limiter validation action", %{app_path: app_path} do
@@ -39,20 +42,19 @@ defmodule Catalyst.Plugins.HammerTest do
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
 
-    assert %Actions.Function{
-             module: Hammer,
-             function: :validate_rate_limiter_module!,
-             args: [^execution]
-           } = validation.action
+    assert {Actions.Function, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :module) == Hammer
+    assert Keyword.get(validation_opts, :function) == :validate_rate_limiter_module!
+    assert Keyword.get(validation_opts, :args) == [execution]
   end
 
   test "validate_rate_limiter_module! passes when generated file exists", %{app_path: app_path} do
     execution = test_execution(app_path)
 
     Executor.run(
-      %Actions.AddFile{
-        path: "lib/rate_limit.ex",
-        content: "defmodule Tmp.RateLimiter do\nend\n"
+      {
+        Actions.AddFile,
+        path: "lib/rate_limit.ex", content: "defmodule Tmp.RateLimiter do\nend\n"
       },
       execution
     )

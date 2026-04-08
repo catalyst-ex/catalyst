@@ -17,41 +17,28 @@ defmodule Catalyst.Plugins.Mailer do
         {"email.ex", "email.ex"}
       ]
       |> Enum.map(fn {target_path, template_path} ->
-        %Actions.AddFile{
-          path: Path.join(mailer_root, target_path),
-          content: read_template!(template_path, app_module_name)
-        }
+        {Actions.AddFile,
+         path: Path.join(mailer_root, target_path),
+         content: read_template!(template_path, app_module_name)}
       end)
 
     [
-      %Actions.AddDependency{
-        name: :swoosh,
-        version: "~> 1.16",
-        opts: []
-      },
-      %Actions.AddConfig{
-        module: mailer_module,
-        opts: [adapter: Swoosh.Adapters.Local]
-      },
-      %Actions.AddConfig{
-        app: :swoosh,
-        module: :api_client,
-        opts: false
-      }
+      {Actions.AddDependency, name: :swoosh, version: "~> 1.16", opts: []},
+      {Actions.AddConfig, module: mailer_module, opts: [adapter: Swoosh.Adapters.Local]},
+      {Actions.AddConfig, [app: :swoosh, module: :api_client, opts: false]}
     ] ++
       template_actions ++
       [
-        %Actions.AddFile{
-          path: Path.join(mailer_root, "mailer.ex"),
-          content: """
-          defmodule #{mailer_module} do
-            use Swoosh.Mailer, otp_app: #{inspect(otp_app)}
+        {Actions.AddFile,
+         path: Path.join(mailer_root, "mailer.ex"),
+         content: """
+         defmodule #{inspect(mailer_module)} do
+           use Swoosh.Mailer, otp_app: #{inspect(otp_app)}
 
-            alias #{mailer_module}.Email
-          end
-          """
-        },
-        %Actions.MixTask{name: "deps.get"}
+           alias #{inspect(mailer_module)}.Email
+         end
+         """},
+        {Actions.MixTask, name: "deps.get"}
       ]
   end
 

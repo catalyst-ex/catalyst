@@ -55,7 +55,7 @@ defmodule Catalyst.ErrorMessages do
 
   def message(:invalid_validation_action, %{plugin: plugin, action: action}),
     do:
-      "Invalid validation action from #{inspect(plugin)}: #{inspect(action)}. Expected a struct in Catalyst.ValidationAction.action."
+      "Invalid validation action from #{inspect(plugin)}: #{inspect(action)}. Expected a keyword-list action with a valid :type module in Catalyst.ValidationAction.action."
 
   def message(:invalid_post_validate_item, %{plugin: plugin, item: item}),
     do:

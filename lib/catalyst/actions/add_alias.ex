@@ -6,17 +6,17 @@ defmodule Catalyst.Actions.AddAlias do
   alias Catalyst.Execution
   alias Sourceror.Zipper
 
-  defstruct [:key, :commands]
-
   @impl true
-  def run(%__MODULE__{} = action, execution \\ Execution.new()) do
+  def run(action, execution \\ Execution.new()) do
     path = Execution.mix_file(execution)
+    key = Keyword.fetch!(action, :key)
+    commands = Keyword.fetch!(action, :commands)
 
-    CLI.info("Adding alias: #{action.key}")
+    CLI.info("Adding alias: #{key}")
 
     patch_mix_file(path, :aliases, fn list_zipper ->
       if list_zipper do
-        upsert_alias_in_list(list_zipper, action.key, action.commands)
+        upsert_alias_in_list(list_zipper, key, commands)
       else
         CLI.warn("Could not find 'aliases' function in #{path}. Skipping.")
         list_zipper

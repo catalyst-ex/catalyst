@@ -3,19 +3,21 @@ defmodule Catalyst.Actions.FunctionTest do
 
   alias Catalyst.Actions
 
-  test "Function exposes expected keys" do
-    expected_keys = [:__struct__, :args, :function, :module] |> Enum.sort()
-    actual_keys = Actions.Function.__struct__() |> Map.keys() |> Enum.sort()
+  test "Function action tuple exposes expected keys" do
+    {mod, opts} = {Actions.Function, module: Kernel, function: :apply, args: []}
+    expected_keys = [:args, :function, :module] |> Enum.sort()
+    actual_keys = opts |> Keyword.keys() |> Enum.sort()
 
+    assert mod == Actions.Function
     assert actual_keys == expected_keys
   end
 
-  test "Function can be instantiated" do
-    action = struct(Actions.Function, module: Kernel, function: :apply, args: [])
+  test "Function action can be represented as tuple" do
+    {mod, opts} = {Actions.Function, module: Kernel, function: :apply, args: []}
 
-    assert %Actions.Function{} = action
-    assert action.module == Kernel
-    assert action.function == :apply
-    assert action.args == []
+    assert mod == Actions.Function
+    assert Keyword.fetch!(opts, :module) == Kernel
+    assert Keyword.fetch!(opts, :function) == :apply
+    assert Keyword.fetch!(opts, :args) == []
   end
 end

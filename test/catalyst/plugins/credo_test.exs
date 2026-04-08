@@ -15,9 +15,12 @@ defmodule Catalyst.Plugins.CredoTest do
       execution
       |> Credo.run()
 
-    Enum.each(actions, fn
-      %Actions.MixTask{} -> :ok
-      action -> Executor.run(action, execution)
+    Enum.each(actions, fn action ->
+      if match?({Actions.MixTask, _}, action) do
+        :ok
+      else
+        Executor.run(action, execution)
+      end
     end)
 
     mix_exs = Path.join(app_path, "mix.exs")
@@ -27,8 +30,8 @@ defmodule Catalyst.Plugins.CredoTest do
     assert mix_source =~ ~s({:credo, "~> 1.7", only: [:dev, :test], runtime: false})
     assert mix_source =~ ~s(quality: ["format", "credo"])
 
-    assert %Actions.MixTask{name: "deps.get"} =
-             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+    assert {Actions.MixTask, deps_opts} = Enum.find(actions, &match?({Actions.MixTask, _}, &1))
+    assert Keyword.get(deps_opts, :name) == "deps.get"
   end
 
   test "post_validate returns required credo validation action" do
@@ -36,6 +39,8 @@ defmodule Catalyst.Plugins.CredoTest do
 
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
-    assert %Actions.MixTask{name: "credo", args: nil} = validation.action
+    assert {Actions.MixTask, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :name) == "credo"
+    assert Keyword.get(validation_opts, :args) == nil
   end
 end

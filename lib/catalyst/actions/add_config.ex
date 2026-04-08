@@ -5,13 +5,12 @@ defmodule Catalyst.Actions.AddConfig do
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
 
-  defstruct [:app, :module, :opts]
-
   @impl true
-  def run(%__MODULE__{} = action, execution \\ Execution.new()) do
+  def run(action, execution \\ Execution.new()) when is_list(action) do
     path = Execution.config_file(execution)
-    app = action.app || Execution.otp_app(execution)
-    mod = action.module
+    app = Keyword.get(action, :app) || Execution.otp_app(execution)
+    mod = Keyword.get(action, :module)
+    opts = Keyword.fetch!(action, :opts)
 
     CLI.info("Configuring: #{inspect(app)} #{if mod, do: inspect(mod)}")
 
@@ -27,7 +26,7 @@ defmodule Catalyst.Actions.AddConfig do
     if config_exists?(zipper, app, mod) do
       CLI.info("   ↳ Config already exists, skipping.")
     else
-      new_ast = build_config_ast(app, mod, action.opts)
+      new_ast = build_config_ast(app, mod, opts)
 
       new_zipper =
         case find_import_config(zipper) do

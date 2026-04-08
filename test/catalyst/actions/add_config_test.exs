@@ -3,24 +3,26 @@ defmodule Catalyst.Actions.AddConfigTest do
 
   alias Catalyst.Actions
 
-  test "AddConfig exposes expected keys" do
-    expected_keys = [:__struct__, :app, :module, :opts] |> Enum.sort()
-    actual_keys = Actions.AddConfig.__struct__() |> Map.keys() |> Enum.sort()
+  test "AddConfig action tuple exposes expected keys" do
+    {mod, opts} =
+      {Actions.AddConfig,
+       app: :my_app, module: MyApp.Repo, opts: [url: "ecto://localhost/my_app"]}
 
+    expected_keys = [:app, :module, :opts] |> Enum.sort()
+    actual_keys = opts |> Keyword.keys() |> Enum.sort()
+
+    assert mod == Actions.AddConfig
     assert actual_keys == expected_keys
   end
 
-  test "AddConfig can be instantiated" do
-    action =
-      struct(Actions.AddConfig,
-        app: :my_app,
-        module: MyApp.Repo,
-        opts: [url: "ecto://localhost/my_app"]
-      )
+  test "AddConfig action can be represented as tuple" do
+    {mod, opts} =
+      {Actions.AddConfig,
+       app: :my_app, module: MyApp.Repo, opts: [url: "ecto://localhost/my_app"]}
 
-    assert %Actions.AddConfig{} = action
-    assert action.app == :my_app
-    assert action.module == MyApp.Repo
-    assert action.opts == [url: "ecto://localhost/my_app"]
+    assert mod == Actions.AddConfig
+    assert Keyword.fetch!(opts, :app) == :my_app
+    assert Keyword.fetch!(opts, :module) == MyApp.Repo
+    assert Keyword.fetch!(opts, :opts) == [url: "ecto://localhost/my_app"]
   end
 end

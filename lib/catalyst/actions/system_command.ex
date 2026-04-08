@@ -4,12 +4,13 @@ defmodule Catalyst.Actions.SystemCommand do
   alias Catalyst.CLI
   alias Catalyst.Errors.ActionError
 
-  defstruct [:cmd, :args, :env, :cd]
-
   @impl true
-  def run(%__MODULE__{cmd: cmd, args: args, env: env, cd: cd}, _execution \\ nil) do
-    args = args || []
-    env = env || []
+  def run(action, _execution \\ nil) when is_list(action) do
+    cmd = Keyword.fetch!(action, :cmd)
+    args = Keyword.get(action, :args, [])
+    env = Keyword.get(action, :env, [])
+    cd = Keyword.get(action, :cd)
+
     opts = [stderr_to_stdout: true, env: env]
     opts = if cd, do: Keyword.put(opts, :cd, cd), else: opts
 
