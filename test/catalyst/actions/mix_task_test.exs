@@ -3,24 +3,24 @@ defmodule Catalyst.Actions.MixTaskTest do
 
   alias Catalyst.Actions
 
-  test "MixTask exposes expected keys" do
-    expected_keys = [:__struct__, :args, :env, :name] |> Enum.sort()
-    actual_keys = Actions.MixTask.__struct__() |> Map.keys() |> Enum.sort()
+  test "MixTask action tuple exposes expected keys" do
+    {mod, opts} =
+      {Actions.MixTask, name: "deps.get", args: ["--only", "test"], env: [{"MIX_ENV", "test"}]}
 
+    expected_keys = [:args, :env, :name] |> Enum.sort()
+    actual_keys = opts |> Keyword.keys() |> Enum.sort()
+
+    assert mod == Actions.MixTask
     assert actual_keys == expected_keys
   end
 
-  test "MixTask can be instantiated" do
-    action =
-      struct(Actions.MixTask,
-        name: "deps.get",
-        args: ["--only", "test"],
-        env: [{"MIX_ENV", "test"}]
-      )
+  test "MixTask action can be represented as tuple" do
+    {mod, opts} =
+      {Actions.MixTask, name: "deps.get", args: ["--only", "test"], env: [{"MIX_ENV", "test"}]}
 
-    assert %Actions.MixTask{} = action
-    assert action.name == "deps.get"
-    assert action.args == ["--only", "test"]
-    assert action.env == [{"MIX_ENV", "test"}]
+    assert mod == Actions.MixTask
+    assert Keyword.fetch!(opts, :name) == "deps.get"
+    assert Keyword.fetch!(opts, :args) == ["--only", "test"]
+    assert Keyword.fetch!(opts, :env) == [{"MIX_ENV", "test"}]
   end
 end

@@ -8,33 +8,27 @@ defmodule Catalyst.Actions.AddAliasTest do
   alias Catalyst.Actions.Executor
   alias Catalyst.Actions
 
-  test "AddAlias exposes expected keys" do
-    expected_keys = [:__struct__, :commands, :key] |> Enum.sort()
-    actual_keys = Actions.AddAlias.__struct__() |> Map.keys() |> Enum.sort()
+  test "AddAlias action tuple exposes expected keys" do
+    {mod, opts} = {Actions.AddAlias, key: :setup, commands: ["deps.get", "compile"]}
+    expected_keys = [:commands, :key] |> Enum.sort()
+    actual_keys = opts |> Keyword.keys() |> Enum.sort()
 
+    assert mod == Actions.AddAlias
     assert actual_keys == expected_keys
   end
 
-  test "AddAlias can be instantiated" do
-    action =
-      struct(Actions.AddAlias,
-        key: :setup,
-        commands: ["deps.get", "compile"]
-      )
+  test "AddAlias action can be represented as tuple" do
+    {mod, opts} = {Actions.AddAlias, key: :setup, commands: ["deps.get", "compile"]}
 
-    assert %Actions.AddAlias{} = action
-    assert action.key == :setup
-    assert action.commands == ["deps.get", "compile"]
+    assert mod == Actions.AddAlias
+    assert Keyword.fetch!(opts, :key) == :setup
+    assert Keyword.fetch!(opts, :commands) == ["deps.get", "compile"]
   end
 
   test "AddAlias updates project source end to end", %{app_path: app_path} do
     execution = test_execution(app_path)
 
-    action =
-      struct(Actions.AddAlias,
-        key: :quality,
-        commands: ["format", "credo"]
-      )
+    action = {Actions.AddAlias, key: :quality, commands: ["format", "credo"]}
 
     Executor.run(action, execution)
 
@@ -48,11 +42,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   } do
     execution = test_execution(app_path)
 
-    action =
-      struct(Actions.AddAlias,
-        key: :quality,
-        commands: ["format", "credo"]
-      )
+    action = {Actions.AddAlias, key: :quality, commands: ["format", "credo"]}
 
     Executor.run(action, execution)
     Executor.run(action, execution)
@@ -68,11 +58,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   test "AddAlias warns and skips when requested commands already exist", %{app_path: app_path} do
     execution = test_execution(app_path)
 
-    action =
-      struct(Actions.AddAlias,
-        key: :quality,
-        commands: ["format", "credo"]
-      )
+    action = {Actions.AddAlias, key: :quality, commands: ["format", "credo"]}
 
     Executor.run(action, execution)
 
@@ -88,11 +74,7 @@ defmodule Catalyst.Actions.AddAliasTest do
   test "AddAlias does not duplicate commands for other aliases", %{app_path: app_path} do
     execution = test_execution(app_path)
 
-    action =
-      struct(Actions.AddAlias,
-        key: :setup,
-        commands: ["deps.get", "compile"]
-      )
+    action = {Actions.AddAlias, key: :setup, commands: ["deps.get", "compile"]}
 
     Executor.run(action, execution)
     Executor.run(action, execution)

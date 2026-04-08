@@ -3,11 +3,13 @@ defmodule Catalyst.Actions.Function do
 
   alias Catalyst.CLI
 
-  defstruct [:module, :function, :args]
-
   @impl true
-  def run(%__MODULE__{module: mod, function: fun, args: args}, _execution) do
-    CLI.info("Executing function: #{mod}.#{fun}(#{Enum.map_join(args || [], ", ", &inspect/1)})")
-    apply(mod, fun, args || [])
+  def run(action, _execution) when is_list(action) do
+    mod = Keyword.fetch!(action, :module)
+    fun = Keyword.fetch!(action, :function)
+    args = Keyword.get(action, :args, [])
+
+    CLI.info("Executing function: #{mod}.#{fun}(#{Enum.map_join(args, ", ", &inspect/1)})")
+    apply(mod, fun, args)
   end
 end

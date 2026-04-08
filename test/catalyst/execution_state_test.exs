@@ -20,11 +20,7 @@ defmodule Catalyst.ExecutionStateTest do
     @impl true
     def run(_execution, _opts) do
       [
-        %Actions.Function{
-          module: __MODULE__,
-          function: :ok_action,
-          args: []
-        }
+        {Actions.Function, module: __MODULE__, function: :ok_action, args: []}
       ]
     end
 
@@ -44,7 +40,7 @@ defmodule Catalyst.ExecutionStateTest do
     def post_validate(_execution, _opts) do
       [
         %ValidationAction{
-          action: %Actions.SystemCommand{cmd: "sh", args: ["-c", "exit 1"]},
+          action: {Actions.SystemCommand, cmd: "sh", args: ["-c", "exit 1"]},
           required: false
         }
       ]
@@ -88,7 +84,7 @@ defmodule Catalyst.ExecutionStateTest do
     assert action_execution.plugin == ActionRecordingPlugin
     assert action_execution.phase == :run
     assert action_execution.status == :ok
-    assert match?(%Actions.Function{}, action_execution.action)
+    assert elem(action_execution.action, 0) == Actions.Function
   end
 
   test "optional post-validation failures are tracked in action_executions" do

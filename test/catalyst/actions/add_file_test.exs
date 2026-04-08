@@ -3,24 +3,26 @@ defmodule Catalyst.Actions.AddFileTest do
 
   alias Catalyst.Actions
 
-  test "AddFile exposes expected keys" do
-    expected_keys = [:__struct__, :content, :path, :template_path] |> Enum.sort()
-    actual_keys = Actions.AddFile.__struct__() |> Map.keys() |> Enum.sort()
+  test "AddFile action tuple exposes expected keys" do
+    {mod, opts} =
+      {Actions.AddFile,
+       path: "lib/example.ex", content: "example content", template_path: "templates/example.eex"}
 
+    expected_keys = [:content, :path, :template_path] |> Enum.sort()
+    actual_keys = opts |> Keyword.keys() |> Enum.sort()
+
+    assert mod == Actions.AddFile
     assert actual_keys == expected_keys
   end
 
-  test "AddFile can be instantiated" do
-    action =
-      struct(Actions.AddFile,
-        path: "lib/example.ex",
-        content: "example content",
-        template_path: "templates/example.eex"
-      )
+  test "AddFile action can be represented as tuple" do
+    {mod, opts} =
+      {Actions.AddFile,
+       path: "lib/example.ex", content: "example content", template_path: "templates/example.eex"}
 
-    assert %Actions.AddFile{} = action
-    assert action.path == "lib/example.ex"
-    assert action.content == "example content"
-    assert action.template_path == "templates/example.eex"
+    assert mod == Actions.AddFile
+    assert Keyword.fetch!(opts, :path) == "lib/example.ex"
+    assert Keyword.fetch!(opts, :content) == "example content"
+    assert Keyword.fetch!(opts, :template_path) == "templates/example.eex"
   end
 end

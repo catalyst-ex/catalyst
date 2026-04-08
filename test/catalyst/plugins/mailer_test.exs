@@ -24,9 +24,12 @@ defmodule Catalyst.Plugins.MailerTest do
     execution = test_execution(app_dir, app_name: app_dir, app_module: "MyApp", otp_app: :my_app)
 
     File.cd!(tmp_root, fn ->
-      Enum.each(actions, fn
-        %Actions.MixTask{} -> :ok
-        action -> Executor.run(action, execution)
+      Enum.each(actions, fn action ->
+        if match?({Actions.MixTask, _}, action) do
+          :ok
+        else
+          Executor.run(action, execution)
+        end
       end)
     end)
 
@@ -54,8 +57,8 @@ defmodule Catalyst.Plugins.MailerTest do
     assert default_layout_source =~ "defmodule MyApp.Mailer.Layouts.DefaultLayout do"
     refute default_layout_source =~ "Catalyst"
 
-    assert %Actions.MixTask{name: "deps.get"} =
-             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+    assert {Actions.MixTask, deps_opts} = Enum.find(actions, &match?({Actions.MixTask, _}, &1))
+    assert Keyword.get(deps_opts, :name) == "deps.get"
   end
 
   test "uses normalized OTP app when display app_name has spaces", %{app_path: app_path} do
@@ -75,9 +78,12 @@ defmodule Catalyst.Plugins.MailerTest do
     execution = test_execution(app_dir, app_name: "My App", app_module: "MyApp", otp_app: :my_app)
 
     File.cd!(tmp_root, fn ->
-      Enum.each(actions, fn
-        %Actions.MixTask{} -> :ok
-        action -> Executor.run(action, execution)
+      Enum.each(actions, fn action ->
+        if match?({Actions.MixTask, _}, action) do
+          :ok
+        else
+          Executor.run(action, execution)
+        end
       end)
     end)
 

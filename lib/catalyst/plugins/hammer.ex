@@ -8,22 +8,17 @@ defmodule Catalyst.Plugins.Hammer do
     module = Module.concat([Execution.app_module(execution), "RateLimiter"])
 
     [
-      %Actions.AddDependency{
-        name: :hammer,
-        version: "~> 0.7.0",
-        opts: []
-      },
-      %Actions.AddFile{
-        path: "lib/rate_limit.ex",
-        content: """
-        defmodule #{module} do
-          use Hammer,
-            backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60, cleanup_interval_ms: 60_000]},
-            rate_limit: {100, :minute}
-        end
-        """
-      },
-      %Actions.MixTask{name: "deps.get"}
+      {Actions.AddDependency, name: :hammer, version: "~> 0.7.0", opts: []},
+      {Actions.AddFile,
+       path: "lib/rate_limit.ex",
+       content: """
+       defmodule #{module} do
+         use Hammer,
+           backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60, cleanup_interval_ms: 60_000]},
+           rate_limit: {100, :minute}
+       end
+       """},
+      {Actions.MixTask, name: "deps.get"}
     ]
   end
 
@@ -31,11 +26,13 @@ defmodule Catalyst.Plugins.Hammer do
   def post_validate(execution, _opts) do
     [
       %Catalyst.ValidationAction{
-        action: %Actions.Function{
-          module: __MODULE__,
-          function: :validate_rate_limiter_module!,
-          args: [execution]
-        },
+        action:
+          {Actions.Function,
+           [
+             module: __MODULE__,
+             function: :validate_rate_limiter_module!,
+             args: [execution]
+           ]},
         required: true
       }
     ]

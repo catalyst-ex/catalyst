@@ -3,10 +3,8 @@ defmodule Catalyst.Actions.DeleteFile do
 
   alias Catalyst.CLI
 
-  defstruct [:path]
-
   @impl true
-  def run(%__MODULE__{path: path}, _execution) do
+  def run([path: path], _execution) do
     CLI.info("Deleting file: #{path}")
     File.rm(path)
   end

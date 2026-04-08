@@ -9,20 +9,11 @@ defmodule Catalyst.Plugins.Sobelow do
   @impl true
   def run(_execution, _opts \\ []) do
     [
-      %Actions.AddDependency{
-        name: :sobelow,
-        version: "~> 0.14.0",
-        opts: [only: [:dev, :test], runtime: false]
-      },
-      %Actions.AddAlias{
-        key: :quality,
-        commands: ["format", "sobelow --exit low"]
-      },
-      %Actions.MixTask{name: "deps.get"},
-      %Actions.AppendFile{
-        path: ".gitignore",
-        content: "\n# Sobelow Security Logs\n.sobelow"
-      }
+      {Actions.AddDependency,
+       name: :sobelow, version: "~> 0.14.0", opts: [only: [:dev, :test], runtime: false]},
+      {Actions.AddAlias, key: :quality, commands: ["format", "sobelow --exit low"]},
+      {Actions.MixTask, name: "deps.get"},
+      {Actions.AppendFile, path: ".gitignore", content: "\n# Sobelow Security Logs\n.sobelow"}
     ]
   end
 
@@ -32,7 +23,7 @@ defmodule Catalyst.Plugins.Sobelow do
 
     [
       %Catalyst.ValidationAction{
-        action: %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]},
+        action: {Actions.MixTask, [name: "sobelow", args: ["--exit", "low"]]},
         required: strict?
       }
     ]

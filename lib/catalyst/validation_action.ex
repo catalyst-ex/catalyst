@@ -6,7 +6,7 @@ defmodule Catalyst.ValidationAction do
   alias Catalyst.Actions
 
   @type t :: %__MODULE__{
-          action: Actions.t(),
+          action: Actions.t() | nil,
           required: boolean(),
           reuse_existing: boolean(),
           plugins: [module()]

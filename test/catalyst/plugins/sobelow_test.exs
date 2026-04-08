@@ -17,9 +17,12 @@ defmodule Catalyst.Plugins.SobelowTest do
       execution
       |> Sobelow.run()
 
-    Enum.each(actions, fn
-      %Actions.MixTask{} -> :ok
-      action -> Executor.run(action, execution)
+    Enum.each(actions, fn action ->
+      if match?({Actions.MixTask, _}, action) do
+        :ok
+      else
+        Executor.run(action, execution)
+      end
     end)
 
     mix_exs = Path.join(app_path, "mix.exs")
@@ -32,8 +35,8 @@ defmodule Catalyst.Plugins.SobelowTest do
     assert gitignore_source =~ "# Sobelow Security Logs"
     assert gitignore_source =~ ".sobelow"
 
-    assert %Actions.MixTask{name: "deps.get"} =
-             Enum.find(actions, &match?(%Actions.MixTask{}, &1))
+    assert {Actions.MixTask, deps_opts} = Enum.find(actions, &match?({Actions.MixTask, _}, &1))
+    assert Keyword.get(deps_opts, :name) == "deps.get"
   end
 
   test "post_validate returns optional action when strict mode is off" do
@@ -41,7 +44,9 @@ defmodule Catalyst.Plugins.SobelowTest do
 
     assert [%ValidationAction{} = validation] = validations
     refute validation.required
-    assert %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]} = validation.action
+    assert {Actions.MixTask, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :name) == "sobelow"
+    assert Keyword.get(validation_opts, :args) == ["--exit", "low"]
   end
 
   test "post_validate returns required action when strict mode is on" do
@@ -49,6 +54,8 @@ defmodule Catalyst.Plugins.SobelowTest do
 
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
-    assert %Actions.MixTask{name: "sobelow", args: ["--exit", "low"]} = validation.action
+    assert {Actions.MixTask, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :name) == "sobelow"
+    assert Keyword.get(validation_opts, :args) == ["--exit", "low"]
   end
 end

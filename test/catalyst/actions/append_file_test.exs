@@ -3,18 +3,20 @@ defmodule Catalyst.Actions.AppendFileTest do
 
   alias Catalyst.Actions
 
-  test "AppendFile exposes expected keys" do
-    expected_keys = [:__struct__, :content, :path] |> Enum.sort()
-    actual_keys = Actions.AppendFile.__struct__() |> Map.keys() |> Enum.sort()
+  test "AppendFile action tuple exposes expected keys" do
+    {mod, opts} = {Actions.AppendFile, path: "README.md", content: ~s(\nNew line)}
+    expected_keys = [:content, :path] |> Enum.sort()
+    actual_keys = opts |> Keyword.keys() |> Enum.sort()
 
+    assert mod == Actions.AppendFile
     assert actual_keys == expected_keys
   end
 
-  test "AppendFile can be instantiated" do
-    action = struct(Actions.AppendFile, path: "README.md", content: ~s(\nNew line))
+  test "AppendFile action can be represented as tuple" do
+    {mod, opts} = {Actions.AppendFile, path: "README.md", content: ~s(\nNew line)}
 
-    assert %Actions.AppendFile{} = action
-    assert action.path == "README.md"
-    assert action.content == ~s(\nNew line)
+    assert mod == Actions.AppendFile
+    assert Keyword.fetch!(opts, :path) == "README.md"
+    assert Keyword.fetch!(opts, :content) == ~s(\nNew line)
   end
 end

@@ -6,20 +6,21 @@ defmodule Catalyst.Actions.AddDependency do
   alias Catalyst.Execution
   alias Sourceror.Zipper
 
-  defstruct [:name, :version, :opts]
-
   @impl true
-  def run(%__MODULE__{} = action, execution \\ Execution.new()) do
+  def run(action, execution \\ Execution.new()) when is_list(action) do
     path = Execution.mix_file(execution)
+    name = Keyword.fetch!(action, :name)
+    version = Keyword.fetch!(action, :version)
+    opts = Keyword.get(action, :opts, [])
 
-    CLI.info("Adding dependency: #{action.name}")
+    CLI.info("Adding dependency: #{name}")
 
     patch_mix_file(path, :deps, fn zipper ->
-      dep_entry = build_dep_ast(action.name, action.version, action.opts)
+      dep_entry = build_dep_ast(name, version, opts)
 
       if zipper do
-        if dependency_exists?(zipper, action.name) do
-          CLI.warn("Dependency #{action.name} already exists, skipping.")
+        if dependency_exists?(zipper, name) do
+          CLI.warn("Dependency #{name} already exists, skipping.")
           zipper
         else
           Zipper.append_child(zipper, dep_entry)

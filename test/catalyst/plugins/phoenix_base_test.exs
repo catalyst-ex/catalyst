@@ -25,7 +25,9 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
 
     actions = PhoenixBase.run(execution, opts)
 
-    assert %Actions.MixTask{name: "phx.new", args: args} = Enum.at(actions, 0)
+    assert {Actions.MixTask, phx_new_opts} = Enum.at(actions, 0)
+    assert Keyword.get(phx_new_opts, :name) == "phx.new"
+    args = Keyword.fetch!(phx_new_opts, :args)
 
     assert args == [
              "my_app",
@@ -50,7 +52,9 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
 
     actions = PhoenixBase.run(execution, opts)
 
-    assert %Actions.MixTask{name: "phx.new", args: ["my_app" | flags]} = Enum.at(actions, 0)
+    assert {Actions.MixTask, phx_new_opts} = Enum.at(actions, 0)
+    assert Keyword.get(phx_new_opts, :name) == "phx.new"
+    ["my_app" | flags] = Keyword.fetch!(phx_new_opts, :args)
     assert flags == ["--no-install", "--no-ecto", "--module", "MyApp"]
   end
 
@@ -62,7 +66,9 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
 
     actions = PhoenixBase.run(execution, opts)
 
-    assert %Actions.MixTask{name: "phx.new", args: args} = Enum.at(actions, 0)
+    assert {Actions.MixTask, phx_new_opts} = Enum.at(actions, 0)
+    assert Keyword.get(phx_new_opts, :name) == "phx.new"
+    args = Keyword.fetch!(phx_new_opts, :args)
     assert args == ["my_app", "--install", "--ecto"]
   end
 
@@ -95,13 +101,10 @@ defmodule Catalyst.Plugins.PhoenixBaseTest do
 
     assert [%ValidationAction{} = validation] = validations
     assert validation.required
-
-    assert %Actions.Function{
-             module: Catalyst.Plugins.PhoenixBase,
-             function: :validate_scaffolded_project!,
-             args: [^execution]
-           } =
-             validation.action
+    assert {Actions.Function, validation_opts} = validation.action
+    assert Keyword.get(validation_opts, :module) == Catalyst.Plugins.PhoenixBase
+    assert Keyword.get(validation_opts, :function) == :validate_scaffolded_project!
+    assert Keyword.get(validation_opts, :args) == [execution]
   end
 
   test "post_validate is empty in existing mode" do
