@@ -32,10 +32,10 @@ defmodule Catalyst.Plugins.Mailer do
         {Actions.AddFile,
          path: Path.join(mailer_root, "mailer.ex"),
          content: """
-         defmodule #{mailer_module} do
+         defmodule #{inspect(mailer_module)} do
            use Swoosh.Mailer, otp_app: #{inspect(otp_app)}
 
-           alias #{mailer_module}.Email
+           alias #{inspect(mailer_module)}.Email
          end
          """},
         {Actions.MixTask, name: "deps.get"}
