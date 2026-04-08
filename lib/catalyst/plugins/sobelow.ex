@@ -23,7 +23,7 @@ defmodule Catalyst.Plugins.Sobelow do
 
     [
       %Catalyst.ValidationAction{
-        action: {Actions.MixTask, [name: "sobelow", args: ["--exit", "low"]]},
+        action: {Actions.MixTask, name: "sobelow", args: ["--exit", "low"]},
         required: strict?
       }
     ]

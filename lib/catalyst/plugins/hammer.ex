@@ -28,11 +28,7 @@ defmodule Catalyst.Plugins.Hammer do
       %Catalyst.ValidationAction{
         action:
           {Actions.Function,
-           [
-             module: __MODULE__,
-             function: :validate_rate_limiter_module!,
-             args: [execution]
-           ]},
+           module: __MODULE__, function: :validate_rate_limiter_module!, args: [execution]},
         required: true
       }
     ]

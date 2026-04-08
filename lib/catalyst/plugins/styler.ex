@@ -14,7 +14,7 @@ defmodule Catalyst.Plugins.Styler do
   def post_validate(_execution, _opts) do
     [
       %Catalyst.ValidationAction{
-        action: {Actions.MixTask, [name: "format", args: ["--check-formatted"]]},
+        action: {Actions.MixTask, name: "format", args: ["--check-formatted"]},
         required: true
       }
     ]

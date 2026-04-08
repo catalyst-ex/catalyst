@@ -14,7 +14,7 @@ defmodule Catalyst.Plugins.Credo do
 
   @impl true
   def post_validate(_execution, _opts) do
-    [%Catalyst.ValidationAction{action: {Actions.MixTask, [name: "credo"]}, required: true}]
+    [%Catalyst.ValidationAction{action: {Actions.MixTask, name: "credo"}, required: true}]
   end
 
   defp read_template!(filename) do
