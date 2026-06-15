@@ -5,9 +5,9 @@ defmodule Catalyst.Plugins.Docker do
   @impl true
   def run(_execution, _opts \\ []) do
     [
-      {Action.RequirePlugin, plugin: Catalyst.Plugins.PhoenixBase, error: "Phoenix plugin is required"},
-      {Action.AddFile,
-        path: "ops/Dockerfile", content: File.read!(template_path("Dockerfile"))},
+      {Action.RequirePlugin,
+       plugin: Catalyst.Plugins.PhoenixBase, error: "Phoenix plugin is required"},
+      {Action.AddFile, path: "ops/Dockerfile", content: File.read!(template_path("Dockerfile"))}
     ]
   end
 
