@@ -66,8 +66,8 @@ defmodule Catalyst.Execution do
 
   def mix_file(%__MODULE__{} = execution), do: resolve_path(execution, "mix.exs")
 
-  def config_file(%__MODULE__{} = execution),
-    do: resolve_path(execution, Path.join("config", "config.exs"))
+  def config_file(%__MODULE__{} = execution, file_name),
+    do: resolve_path(execution, Path.join("config", file_name))
 
   defp fetch!(%__MODULE__{config: nil}, _path, _reason) do
     raise ExecutionError,

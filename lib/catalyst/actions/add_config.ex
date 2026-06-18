@@ -7,7 +7,8 @@ defmodule Catalyst.Actions.AddConfig do
 
   @impl true
   def run(action, execution \\ Execution.new()) when is_list(action) do
-    path = Execution.config_file(execution)
+    file_name = Keyword.get(action, :config_file) || "config.exs"
+    path = Execution.config_file(execution, file_name)
     app = Keyword.get(action, :app) || Execution.otp_app(execution)
     mod = Keyword.get(action, :module)
     opts = Keyword.fetch!(action, :opts)
