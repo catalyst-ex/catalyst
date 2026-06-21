@@ -97,7 +97,6 @@ defmodule Catalyst.Actions.AddDependency do
   defp build_dep_ast(name, version, []), do: {:{}, [], [name, version]}
   defp build_dep_ast(name, version, opts), do: {:{}, [], [name, version, opts]}
 
-
   defp dependency_exists?(deps_list_zipper, dep_name) do
     deps_list_zipper
     |> Zipper.node()
