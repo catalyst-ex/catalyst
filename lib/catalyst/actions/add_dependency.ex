@@ -94,13 +94,9 @@ defmodule Catalyst.Actions.AddDependency do
     end
   end
 
-  defp build_dep_ast(name, version, opts) do
-    if opts == [] do
-      {name, version}
-    else
-      {:{}, [], [name, version, opts]}
-    end
-  end
+  defp build_dep_ast(name, version, []), do: {:{}, [], [name, version]}
+  defp build_dep_ast(name, version, opts), do: {:{}, [], [name, version, opts]}
+
 
   defp dependency_exists?(deps_list_zipper, dep_name) do
     deps_list_zipper

@@ -7,9 +7,9 @@ defmodule Catalyst.Plugins.Sentry do
   def run(execution, _opts \\ []) do
     [
       # Dependency
-      {Actions.AddDependency, name: :sentry, version: "~> 13.0.2", opts: []},
-      {Actions.AddDependency, name: :jason, version: "~> 1.1", opts: []},
-      {Actions.AddDependency, name: :hackney, version: "~> 1.8", opts: []},
+      {Actions.AddDependency, name: :sentry, version: "~> 12.0.2"},
+      {Actions.AddDependency, name: :jason, version: "~> 1.1"},
+      {Actions.AddDependency, name: :hackney, version: "~> 1.8"},
 
       # Basic Sentry config
       {Actions.AddConfig,
