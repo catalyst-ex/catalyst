@@ -26,7 +26,7 @@ defmodule Catalyst.Plugins.DotenvyTest do
     mix_source = File.read!(Path.join(app_path, "mix.exs"))
     runtime_source = File.read!(runtime_exs)
 
-    assert mix_source =~ ~s(dotenvy: "1.0.0")
+    assert mix_source =~ ~s({:dotenvy, "1.0.0"})
     assert runtime_source =~ "import Dotenvy"
     assert runtime_source =~ ~S|source(["secrets/#{config_env()}.env", System.get_env()])|
 

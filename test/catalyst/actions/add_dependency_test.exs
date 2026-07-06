@@ -48,6 +48,6 @@ defmodule Catalyst.Actions.AddDependencyTest do
 
     mix_exs = Path.join(app_path, "mix.exs")
     mix_source = File.read!(mix_exs)
-    assert length(Regex.scan(~r/\bplug:\s*"~> 1\.0"/, mix_source)) == 1
+    assert length(Regex.scan(~r/\{\s*:plug\s*,\s*"~>\s*1\.0"\s*\}/, mix_source)) == 1
   end
 end

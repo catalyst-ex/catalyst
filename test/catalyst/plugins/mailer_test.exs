@@ -43,7 +43,7 @@ defmodule Catalyst.Plugins.MailerTest do
         Path.join([app_path, "lib", app_dir <> "_mailer", "layouts", "default_layout.ex"])
       )
 
-    assert mix_source =~ ~s(swoosh: "~> 1.16")
+    assert mix_source =~ ~s({:swoosh, "~> 1.16"})
     assert config_source =~ "config(:my_app, MyApp.Mailer"
     assert config_source =~ "adapter: Swoosh.Adapters.Local"
     assert config_source =~ "config(:swoosh, :api_client, false)"

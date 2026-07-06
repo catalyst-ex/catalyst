@@ -25,7 +25,7 @@ defmodule Catalyst.Plugins.HammerTest do
     mix_source = File.read!(Path.join(app_path, "mix.exs"))
     rate_limiter_source = File.read!(Path.join([app_path, "lib", "rate_limit.ex"]))
 
-    assert mix_source =~ ~s(hammer: "~> 0.7.0")
+    assert mix_source =~ ~s({:hammer, "~> 0.7.0"})
     assert rate_limiter_source =~ "defmodule Elixir.Tmp.RateLimiter do"
     assert rate_limiter_source =~ "use Hammer"
     assert rate_limiter_source =~ "rate_limit: {100, :minute}"
