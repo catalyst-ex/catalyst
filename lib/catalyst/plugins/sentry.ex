@@ -1,10 +1,11 @@
 defmodule Catalyst.Plugins.Sentry do
   use Catalyst.Plugin
   alias Sourceror.Zipper
+  alias Catalyst.Execution
 
   @impl true
   def run(execution, _opts \\ []) do
-    otp = execution.config.app.otp_app
+    otp = Execution.otp_app(execution)
     endpoint_path = Path.join(["lib", "#{otp}_web", "endpoint.ex"])
     web_path = Path.join(["lib", "#{otp}_web.ex"])
 
