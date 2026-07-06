@@ -1,15 +1,39 @@
 defmodule Catalyst.Plugins.Sentry do
   use Catalyst.Plugin
-
-  alias Catalyst.Execution
+  alias Sourceror.Zipper
 
   @impl true
   def run(execution, _opts \\ []) do
+    otp = execution.config.app.otp_app
+    endpoint_path = Path.join(["lib", "#{otp}_web", "endpoint.ex"])
+    web_path = Path.join(["lib", "#{otp}_web.ex"])
+
     [
       # Dependency
-      {Actions.AddDependency, name: :sentry, version: "~> 12.0.2"},
+      {Actions.AddDependency, name: :sentry, version: "~> 13.2.0"},
       {Actions.AddDependency, name: :jason, version: "~> 1.1"},
       {Actions.AddDependency, name: :hackney, version: "~> 1.8"},
+      {Actions.PatchFile,
+       path: endpoint_path,
+       target: :defmodule,
+       content: "plug Sentry.PlugContext",
+       position: :after,
+       anchor: fn
+         {:plug, _, [{:__aliases__, _, [:Plug, :Parsers]} | _]} -> true
+         _ -> false
+       end},
+      {Actions.PatchFile,
+       path: web_path,
+       target: [:live_view, :quote],
+       content: "on_mount Sentry.LiveViewHook",
+       position: :after,
+       anchor: fn
+         {:use, _, [{:__aliases__, _, [:Phoenix, :LiveView]}]} ->
+           true
+
+         _ ->
+           false
+       end},
 
       # Basic Sentry config
       {Actions.AddConfig,
@@ -52,7 +76,6 @@ defmodule Catalyst.Plugins.Sentry do
             }}
          ]
        ]},
-
       # Fetch deps
       {Actions.MixTask, name: "deps.get"}
     ]
