@@ -4,17 +4,9 @@ defmodule Catalyst.MixProject do
   @app :catalyst
   @name "Catalyst"
   @version "0.1.0"
-  @github "https://github.com/sruplex/#{@app}"
-  @author "Mudassar Ali"
+  @github "https://github.com/catalyst-ex/#{@app}"
+  @author "Sheharyar Naseer"
   @license "MIT"
-
-  # NOTE:
-  # To publish package or update docs, use the `docs`
-  # mix environment to not include support modules
-  # that are normally included in the `dev` environment
-  #
-  #   MIX_ENV=docs hex.publish
-  #
 
   def project do
     [
@@ -64,9 +56,7 @@ defmodule Catalyst.MixProject do
   end
 
   # Compilation Paths
-  defp elixirc_paths(:test),
-    do: ["lib", "test/support"]
-
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_env), do: ["lib"]
 
   # Package Description
