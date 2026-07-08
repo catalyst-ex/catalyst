@@ -41,7 +41,7 @@ catalyst/
 │   │       └── elixir_base.ex      # Core Generator Plugin
 │   └── mix/
 │       └── tasks/
-│           └── catalyst.new.ex     # CLI Entry Point
+│           └── catalyst.run.ex     # CLI Entry Point
 └── mix.exs
 ```
 
@@ -49,7 +49,7 @@ catalyst/
 
 Catalyst runs from a config file:
 
-> mix catalyst.new path/to/config.exs
+> mix catalyst.run path/to/config.exs
 
 ## Configuration
 

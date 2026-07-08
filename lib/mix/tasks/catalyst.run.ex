@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Catalyst.New do
+defmodule Mix.Tasks.Catalyst.Run do
   use Mix.Task
   alias Catalyst.CLI
   alias Catalyst.Config.Loader

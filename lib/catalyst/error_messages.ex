@@ -33,7 +33,7 @@ defmodule Catalyst.ErrorMessages do
   def message(:unknown_action, %{action: action}),
     do: "Unknown action encountered: #{inspect(action)}"
 
-  def message(:invalid_cli_args, _), do: "Usage: mix catalyst.new <path/to/config.exs>"
+  def message(:invalid_cli_args, _), do: "Usage: mix catalyst.run <path/to/config.exs>"
 
   def message(:missing_existing_project, %{path: path}),
     do: "Directory #{path} does not exist. Set app.path to an existing project directory."
