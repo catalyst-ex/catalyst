@@ -4,7 +4,6 @@ defmodule Catalyst.PluginOptionParserTest do
   alias Catalyst.Errors.PluginError
   alias Catalyst.Plugin
   alias Catalyst.PluginOptionParser
-  alias Catalyst.Plugins.PhoenixBase
 
   defmodule ThirdPartyPlugin do
     use Plugin
@@ -70,17 +69,32 @@ defmodule Catalyst.PluginOptionParserTest do
     def run(_execution, _opts), do: []
   end
 
-  test "accepts phoenix version option for PhoenixBase" do
+  defmodule PluginWithSchema do
+    use Plugin
+
+    @impl true
+    def opts_schema do
+      [
+        phoenix: [type: :string],
+        flags: [type: {:one_of, [:list, :map]}, default: []]
+      ]
+    end
+
+    @impl true
+    def run(_execution, _opts), do: []
+  end
+
+  test "accepts options declared by a plugin schema" do
     opts = [phoenix: "1.18.4", flags: [install: false, ecto: false, mailer: false]]
 
-    assert Keyword.keyword?(PluginOptionParser.validate!(PhoenixBase, opts, %{}))
+    assert Keyword.keyword?(PluginOptionParser.validate!(PluginWithSchema, opts, %{}))
   end
 
   test "parse returns invalid for unknown option in strict mode" do
     opts = [phoenix: "1.18.4", unknown: true]
 
     {parsed, rest, invalid} =
-      PluginOptionParser.parse(PhoenixBase, opts, %{}, strict: [phoenix: :string])
+      PluginOptionParser.parse(PluginWithSchema, opts, %{}, strict: [phoenix: :string])
 
     assert parsed == [phoenix: "1.18.4"]
     assert rest == []
@@ -88,7 +102,7 @@ defmodule Catalyst.PluginOptionParserTest do
     assert [
              %{
                kind: :unknown_option,
-               plugin: PhoenixBase,
+               plugin: PluginWithSchema,
                option: :unknown,
                value: true,
                allowed_keys: [:phoenix]
@@ -100,7 +114,7 @@ defmodule Catalyst.PluginOptionParserTest do
     opts = [phoenix: 123]
 
     {parsed, rest, invalid} =
-      PluginOptionParser.parse(PhoenixBase, opts, %{}, strict: [phoenix: :string])
+      PluginOptionParser.parse(PluginWithSchema, opts, %{}, strict: [phoenix: :string])
 
     assert parsed == []
     assert rest == []
@@ -108,7 +122,7 @@ defmodule Catalyst.PluginOptionParserTest do
     assert [
              %{
                kind: :invalid_type,
-               plugin: PhoenixBase,
+               plugin: PluginWithSchema,
                option: :phoenix,
                expected_type: :string,
                value: 123
@@ -120,7 +134,7 @@ defmodule Catalyst.PluginOptionParserTest do
     opts = [phoenix: "1.18.4", unknown: true]
 
     {parsed, rest, invalid} =
-      PluginOptionParser.parse(PhoenixBase, opts, %{}, switches: [phoenix: :string])
+      PluginOptionParser.parse(PluginWithSchema, opts, %{}, switches: [phoenix: :string])
 
     assert Keyword.get(parsed, :phoenix) == "1.18.4"
     assert Keyword.get(parsed, :unknown) == true
@@ -132,7 +146,7 @@ defmodule Catalyst.PluginOptionParserTest do
     opts = [phx: "1.18.4"]
 
     {parsed, rest, invalid} =
-      PluginOptionParser.parse(PhoenixBase, opts, %{}, aliases: [phx: :phoenix])
+      PluginOptionParser.parse(PluginWithSchema, opts, %{}, aliases: [phx: :phoenix])
 
     assert Keyword.get(parsed, :phoenix) == "1.18.4"
     assert Keyword.get(parsed, :flags) == []
@@ -143,7 +157,7 @@ defmodule Catalyst.PluginOptionParserTest do
   test "parse overrides duplicate values by default" do
     opts = [phoenix: "1.18.4", phoenix: "1.18.5"]
 
-    {parsed, rest, invalid} = PluginOptionParser.parse(PhoenixBase, opts, %{})
+    {parsed, rest, invalid} = PluginOptionParser.parse(PluginWithSchema, opts, %{})
 
     assert Keyword.get(parsed, :phoenix) == "1.18.5"
     assert rest == []
@@ -154,7 +168,7 @@ defmodule Catalyst.PluginOptionParserTest do
     opts = [phoenix: "1.18.4", phoenix: "1.18.5"]
 
     {parsed, rest, invalid} =
-      PluginOptionParser.parse(PhoenixBase, opts, %{}, strict: [phoenix: [:string, :keep]])
+      PluginOptionParser.parse(PluginWithSchema, opts, %{}, strict: [phoenix: [:string, :keep]])
 
     assert Keyword.get_values(parsed, :phoenix) == ["1.18.4", "1.18.5"]
     assert rest == []
@@ -171,7 +185,7 @@ defmodule Catalyst.PluginOptionParserTest do
 
   test "strict and switches together raises ArgumentError" do
     assert_raise ArgumentError, "Only one of :strict or :switches may be provided", fn ->
-      PluginOptionParser.parse(PhoenixBase, [phoenix: "1.18.4"], %{},
+      PluginOptionParser.parse(PluginWithSchema, [phoenix: "1.18.4"], %{},
         strict: [phoenix: :string],
         switches: [phoenix: :string]
       )
@@ -181,8 +195,8 @@ defmodule Catalyst.PluginOptionParserTest do
   test "parse with non-keyword opts returns invalid_opts_type" do
     opts = %{phoenix: "1.18.4"}
 
-    assert {[], [], [%{kind: :invalid_opts_type, plugin: PhoenixBase, opts: ^opts}]} =
-             PluginOptionParser.parse(PhoenixBase, opts, %{})
+    assert {[], [], [%{kind: :invalid_opts_type, plugin: PluginWithSchema, opts: ^opts}]} =
+             PluginOptionParser.parse(PluginWithSchema, opts, %{})
   end
 
   test "validate! with non-keyword opts raises PluginError reason invalid_plugin_opts" do
@@ -190,11 +204,11 @@ defmodule Catalyst.PluginOptionParserTest do
 
     error =
       assert_raise PluginError, fn ->
-        PluginOptionParser.validate!(PhoenixBase, opts, %{})
+        PluginOptionParser.validate!(PluginWithSchema, opts, %{})
       end
 
     assert error.reason == :invalid_plugin_opts
-    assert error.context.plugin == PhoenixBase
+    assert error.context.plugin == PluginWithSchema
   end
 
   test "strict rules apply default value" do
@@ -221,7 +235,7 @@ defmodule Catalyst.PluginOptionParserTest do
 
   test "switches mode allows unknown even when plugin schema exists" do
     {parsed, rest, invalid} =
-      PluginOptionParser.parse(PhoenixBase, [phoenix: "1.18.4", surprise: true], %{},
+      PluginOptionParser.parse(PluginWithSchema, [phoenix: "1.18.4", surprise: true], %{},
         switches: [phoenix: :string]
       )
 

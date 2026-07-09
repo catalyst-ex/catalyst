@@ -36,9 +36,6 @@ catalyst/
 │   │   │   ├── add_dependency.ex   # Action Struct + Runner
 │   │   │   ├── system_command.ex   # Action Struct + Runner
 │   │   │   └── executor.ex         # Central Action Dispatcher
-│   │   └── plugins/
-│   │       └── phoenix_base.ex     # Core Generator Plugin 
-│   │       └── elixir_base.ex      # Core Generator Plugin
 │   └── mix/
 │       └── tasks/
 │           └── catalyst.run.ex     # CLI Entry Point
@@ -50,6 +47,10 @@ catalyst/
 Catalyst runs from a config file:
 
 > mix catalyst.run path/to/config.exs
+
+Official plugins live in a sibling `catalyst_plugins` package/repository.
+The core package owns the engine, action APIs, and plugin behavior; the plugins
+package owns built-in plugin modules and their templates.
 
 ## Configuration
 
