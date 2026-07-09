@@ -5,8 +5,6 @@ defmodule Catalyst.MixProject do
   @name "Catalyst"
   @version "0.1.0"
   @github "https://github.com/catalyst-ex/#{@app}"
-  @author "Sheharyar Naseer"
-  @license "MIT"
 
   def project do
     [
@@ -68,10 +66,10 @@ defmodule Catalyst.MixProject do
   defp package do
     [
       name: @app,
-      maintainers: [@author],
-      licenses: [@license],
+      maintainers: ["Sheharyar Naseer", "Mudassar Ali", "Rana Tallal Ahmad"],
+      licenses: ~w[MIT],
       files: ~w(mix.exs lib README.md),
-      links: %{"Github" => @github}
+      links: %{"GitHub" => @github}
     ]
   end
 end
