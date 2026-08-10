@@ -3,7 +3,7 @@ defmodule Catalyst.MixProject do
 
   @app :catalyst
   @name "Catalyst"
-  @version "0.1.0"
+  @version "1.0.0-beta.0"
   @github "https://github.com/catalyst-ex/#{@app}"
 
   def project do
@@ -59,7 +59,7 @@ defmodule Catalyst.MixProject do
 
   # Package Description
   defp description do
-    "Catalyst: A project scaffolding tool for Elixir"
+    "Catalyst: Codemod, generation and scaffolding for Elixir"
   end
 
   # Package Information
