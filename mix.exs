@@ -38,11 +38,12 @@ defmodule Catalyst.MixProject do
   # Dependencies
   defp deps do
     [
-      {:owl, "~> 0.12"},
-      {:sourceror, "~> 1.0"},
-      {:ucwidth, "~> 0.2"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev},
+      {:owl, "~> 0.12"},
+      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
+      {:sourceror, "~> 1.0"},
+      {:ucwidth, "~> 0.2"}
     ]
   end
 
