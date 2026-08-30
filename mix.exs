@@ -60,7 +60,7 @@ defmodule Catalyst.MixProject do
 
   # Package Description
   defp description do
-    "Catalyst: Codemod, generation and scaffolding for Elixir"
+    "Codemod, generation and scaffolding for Elixir"
   end
 
   # Package Information
