@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Catalyst.Run do
   use Mix.Task
-  require Logger
 
+  alias Catalyst.CLI.IO
   alias Catalyst.Config.Loader
   alias Catalyst.Errors.CLIError
 
@@ -20,25 +20,25 @@ defmodule Mix.Tasks.Catalyst.Run do
   end
 
   defp generate_from_config(path) do
-    Logger.info("Loading configuration from #{path}...")
+    IO.info("Loading configuration from #{path}...")
 
     # Load configuration
     config = Loader.load!(path)
 
     case config.mode do
       :existing ->
-        Logger.info("Running Catalyst on existing project #{config.app.name}...")
+        IO.info("Running Catalyst on existing project #{config.app.name}...")
         ensure_existing_project!(config.app.path)
 
       :new ->
-        Logger.info("Starting Catalyst for #{config.app.name}...")
+        IO.info("Starting Catalyst for #{config.app.name}...")
         ensure_new_project_target!(config.app.path)
     end
 
     # Build the app
     {:ok, _execution} = Catalyst.build(config)
 
-    Logger.info("Done! Catalyst finished in #{Path.expand(config.app.path)}")
+    IO.success("Done! Catalyst finished in #{Path.expand(config.app.path)}")
   end
 
   # -- Helpers --

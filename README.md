@@ -36,9 +36,12 @@ catalyst/
 │   │   │   ├── add_dependency.ex   # Action Struct + Runner
 │   │   │   ├── system_command.ex   # Action Struct + Runner
 │   │   │   └── executor.ex         # Central Action Dispatcher
-│   └── mix/
-│       └── tasks/
-│           └── catalyst.run.ex     # CLI Entry Point
+├── cli/                            # Global Mix archive commands
+│   └── lib/
+│       └── mix/
+│           └── tasks/
+│               ├── catalyst.run.ex
+│               └── catalyst.plugin.ex
 └── mix.exs
 ```
 
