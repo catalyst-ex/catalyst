@@ -1,7 +1,7 @@
 defmodule Catalyst.Actions.AddConfig do
   use Catalyst.Action
+  require Logger
 
-  alias Catalyst.Shell
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
 
@@ -13,7 +13,7 @@ defmodule Catalyst.Actions.AddConfig do
     mod = Keyword.get(action, :module)
     opts = Keyword.fetch!(action, :opts)
 
-    Shell.info("Configuring: #{inspect(app)} #{if mod, do: inspect(mod)}")
+    Logger.info("Configuring: #{inspect(app)} #{if mod, do: inspect(mod)}")
 
     unless File.exists?(path) do
       raise ActionError,
@@ -25,7 +25,7 @@ defmodule Catalyst.Actions.AddConfig do
     zipper = source |> Sourceror.parse_string!() |> Sourceror.Zipper.zip()
 
     if config_exists?(zipper, app, mod) do
-      Shell.info("   ↳ Config already exists, skipping.")
+      Logger.info("   ↳ Config already exists, skipping.")
     else
       new_ast = build_config_ast(app, mod, opts)
 

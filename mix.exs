@@ -40,7 +40,6 @@ defmodule Catalyst.MixProject do
     [
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:owl, "~> 0.12"},
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
       {:sourceror, "~> 1.0"},
       {:ucwidth, "~> 0.2"}

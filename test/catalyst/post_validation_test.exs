@@ -1,7 +1,7 @@
 defmodule Catalyst.PostValidationTest do
   use ExUnit.Case, async: false
 
-  import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
   alias Catalyst.Actions
   alias Catalyst.Errors.ValidationError
@@ -95,7 +95,7 @@ defmodule Catalyst.PostValidationTest do
     config = config_with_plugins([OptionalFailurePlugin])
 
     output =
-      capture_io(fn ->
+      capture_log(fn ->
         assert {:ok, _execution} = Catalyst.build(config)
       end)
 
@@ -107,7 +107,7 @@ defmodule Catalyst.PostValidationTest do
     config = config_with_plugins([OptionalFailurePlugin, OptionalFailurePluginDuplicate])
 
     output =
-      capture_io(fn ->
+      capture_log(fn ->
         assert {:ok, _execution} = Catalyst.build(config)
       end)
 

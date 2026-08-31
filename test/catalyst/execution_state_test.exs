@@ -1,7 +1,7 @@
 defmodule Catalyst.ExecutionStateTest do
   use ExUnit.Case, async: false
 
-  import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
   alias Catalyst.ActionExecution
   alias Catalyst.Actions
@@ -91,7 +91,7 @@ defmodule Catalyst.ExecutionStateTest do
     config = config_with_plugins([OptionalValidationFailurePlugin])
 
     output =
-      capture_io(fn ->
+      capture_log(fn ->
         assert {:ok, %Execution{} = execution} = Catalyst.build(config)
 
         assert [plugin_run] = execution.plugin_runs

@@ -1,11 +1,10 @@
 defmodule Catalyst.Actions.MoveFile do
   use Catalyst.Action
-
-  alias Catalyst.Shell
+  require Logger
 
   @impl true
   def run([from: from, to: to], _execution) do
-    Shell.info("Moving file from #{from} to #{to}")
+    Logger.info("Moving file from #{from} to #{to}")
     File.mkdir_p!(Path.dirname(to))
     File.rename(from, to)
   end

@@ -3,7 +3,7 @@ defmodule Catalyst.Actions.AddAliasTest do
 
   @moduletag setup_project: true
 
-  import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
   alias Catalyst.Actions.Executor
   alias Catalyst.Actions
@@ -63,11 +63,10 @@ defmodule Catalyst.Actions.AddAliasTest do
     Executor.run(action, execution)
 
     output =
-      capture_io(fn ->
+      capture_log(fn ->
         Executor.run(action, execution)
       end)
 
-    assert output =~ "warn"
     assert output =~ "Alias quality already contains requested commands, skipping."
   end
 

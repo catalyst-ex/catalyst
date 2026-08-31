@@ -3,10 +3,11 @@ defmodule Catalyst do
   Main entry point for Catalyst. Orchestrates the execution of plugins, actions, and validations.
   """
 
+  require Logger
+
   alias Catalyst.ActionRunner
   alias Catalyst.Execution
   alias Catalyst.PluginPlanner
-  alias Catalyst.Shell
   alias Catalyst.ValidationPipeline
 
   def build(config) do
@@ -39,6 +40,6 @@ defmodule Catalyst do
   defp maybe_print_validation_summary(warnings) do
     details = warnings |> Enum.map(&("- " <> &1)) |> Enum.join("\n\n")
 
-    Shell.warn("Optional post-validations reported issues:\n\n#{details}")
+    Logger.warning("Optional post-validations reported issues:\n\n#{details}")
   end
 end

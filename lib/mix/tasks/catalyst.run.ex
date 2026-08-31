@@ -1,8 +1,9 @@
 defmodule Mix.Tasks.Catalyst.Run do
   use Mix.Task
+  require Logger
+
   alias Catalyst.Config.Loader
   alias Catalyst.Errors.CLIError
-  alias Catalyst.Shell
 
   @shortdoc "Creates a new app from a configuration file"
 
@@ -19,25 +20,25 @@ defmodule Mix.Tasks.Catalyst.Run do
   end
 
   defp generate_from_config(path) do
-    Shell.info("Loading configuration from #{path}...")
+    Logger.info("Loading configuration from #{path}...")
 
     # Load configuration
     config = Loader.load!(path)
 
     case config.mode do
       :existing ->
-        Shell.info("Running Catalyst on existing project #{config.app.name}...")
+        Logger.info("Running Catalyst on existing project #{config.app.name}...")
         ensure_existing_project!(config.app.path)
 
       :new ->
-        Shell.info("Starting Catalyst for #{config.app.name}...")
+        Logger.info("Starting Catalyst for #{config.app.name}...")
         ensure_new_project_target!(config.app.path)
     end
 
     # Build the app
     {:ok, _execution} = Catalyst.build(config)
 
-    Shell.success("Done! Catalyst finished in #{Path.expand(config.app.path)}")
+    Logger.info("Done! Catalyst finished in #{Path.expand(config.app.path)}")
   end
 
   # -- Helpers --

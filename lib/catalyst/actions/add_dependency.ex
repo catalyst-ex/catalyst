@@ -1,7 +1,7 @@
 defmodule Catalyst.Actions.AddDependency do
   use Catalyst.Action
+  require Logger
 
-  alias Catalyst.Shell
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
   alias Sourceror.Zipper
@@ -13,20 +13,20 @@ defmodule Catalyst.Actions.AddDependency do
     version = Keyword.fetch!(action, :version)
     opts = Keyword.get(action, :opts, [])
 
-    Shell.info("Adding dependency: #{name}")
+    Logger.info("Adding dependency: #{name}")
 
     patch_mix_file(path, :deps, fn zipper ->
       dep_entry = build_dep_ast(name, version, opts)
 
       if zipper do
         if dependency_exists?(zipper, name) do
-          Shell.warn("Dependency #{name} already exists, skipping.")
+          Logger.warning("Dependency #{name} already exists, skipping.")
           zipper
         else
           Zipper.append_child(zipper, dep_entry)
         end
       else
-        Shell.warn("Could not find 'deps' function in #{path}. Skipping.")
+        Logger.warning("Could not find 'deps' function in #{path}. Skipping.")
         zipper
       end
     end)
@@ -48,7 +48,7 @@ defmodule Catalyst.Actions.AddDependency do
       |> find_function_list(fun_name)
       |> case do
         nil ->
-          Shell.error("Failed to find function '#{fun_name}' in #{path}")
+          Logger.error("Failed to find function '#{fun_name}' in #{path}")
           source
 
         zipper ->
