@@ -58,24 +58,38 @@ defmodule Catalyst.CLI.Registry do
 
   defp registry_sources(opts) do
     case Keyword.get(opts, :registries) do
-      nil -> configured_sources() ++ [@default_registry_url]
+      nil -> configured_or_default_sources()
       sources -> List.wrap(sources)
+    end
+  end
+
+  defp configured_or_default_sources do
+    case configured_sources() do
+      {:ok, sources} -> sources
+      :error -> [@default_registry_url]
     end
   end
 
   defp configured_sources do
     [Path.expand(".catalyst.exs"), Path.expand("~/.catalyst/config.exs")]
-    |> Enum.flat_map(fn path ->
+    |> Enum.reduce({false, []}, fn path, {found?, sources} ->
       if File.exists?(path) do
-        path
-        |> Code.eval_file()
-        |> elem(0)
-        |> Keyword.get(:registries, [])
-        |> List.wrap()
+        registries =
+          path
+          |> Code.eval_file()
+          |> elem(0)
+          |> Keyword.get(:registries, [])
+          |> List.wrap()
+
+        {true, sources ++ registries}
       else
-        []
+        {found?, sources}
       end
     end)
+    |> case do
+      {true, sources} -> {:ok, sources}
+      {false, []} -> :error
+    end
   end
 
   defp load_source(%{} = registry), do: {:ok, registry}

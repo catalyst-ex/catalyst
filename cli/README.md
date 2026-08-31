@@ -6,9 +6,10 @@ This package is intended to be published as a Mix archive so users can run
 commands such as `mix catalyst.run` and `mix catalyst.plugin` without adding
 the CLI package directly to each project.
 
-Plugin discovery is registry-based. By default, the CLI looks for the official
-registry published by `catalyst-plugins`. Users can add extra registry URLs or
-JSON files in `.catalyst.exs` or `~/.catalyst/config.exs`:
+Plugin discovery is registry-based. If no registry config is present, the CLI
+uses the official `catalyst-plugins` registry. Users can replace that default
+with registry URLs or JSON files in `.catalyst.exs` or
+`~/.catalyst/config.exs`:
 
 ```elixir
 [
