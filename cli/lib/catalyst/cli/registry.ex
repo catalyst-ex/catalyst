@@ -41,7 +41,7 @@ defmodule Catalyst.CLI.Registry do
     Enum.reduce_while(sources, {:error, :not_found}, fn source, _acc ->
       case load_source(source) do
         {:ok, registry} ->
-          case entry_from_registry(registry, name, source) do
+          case entry_from_registry(registry, lookup_names(name), source) do
             {:ok, entry} -> {:halt, {:ok, entry}}
             :error -> {:cont, {:error, :not_found}}
           end
@@ -133,18 +133,28 @@ defmodule Catalyst.CLI.Registry do
            "package" => package,
            "plugins" => plugins
          } = registry,
-         name,
+         names,
          source
        )
        when is_binary(package) and is_map(plugins) do
-    case Map.get(plugins, name) do
+    case find_plugin(plugins, names) do
       nil -> :error
-      module when is_binary(module) -> {:ok, build_entry(name, module, registry, source)}
+      {name, module} when is_binary(module) -> {:ok, build_entry(name, module, registry, source)}
       _invalid -> :error
     end
   end
 
-  defp entry_from_registry(_registry, _name, _source), do: :error
+  defp entry_from_registry(_registry, _names, _source), do: :error
+
+  defp find_plugin(plugins, names) do
+    names
+    |> Enum.find_value(fn name ->
+      case Map.fetch(plugins, name) do
+        {:ok, module} -> {name, module}
+        :error -> nil
+      end
+    end)
+  end
 
   defp build_entry(name, module, registry, source) do
     %Entry{
@@ -175,5 +185,15 @@ defmodule Catalyst.CLI.Registry do
     |> String.trim()
     |> String.downcase()
     |> String.replace("_", "-")
+  end
+
+  defp lookup_names(normalized_name) do
+    camelized_name =
+      normalized_name
+      |> String.replace("-", "_")
+      |> Macro.camelize()
+
+    [normalized_name, camelized_name]
+    |> Enum.uniq()
   end
 end

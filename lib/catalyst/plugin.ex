@@ -3,9 +3,11 @@ defmodule Catalyst.Plugin do
   alias Catalyst.ValidationAction
 
   @callback init(opts :: keyword(), config :: map()) :: {:ok, keyword()} | {:error, term()}
+  @callback name() :: atom() | String.t()
   @callback opts_schema() :: keyword()
   @callback run(execution :: %Execution{}, opts :: keyword()) :: [Catalyst.Actions.t()]
   @callback post_validate(execution :: %Execution{}, opts :: keyword()) :: [ValidationAction.t()]
+  @optional_callbacks name: 0
 
   defmacro __using__(_) do
     quote do

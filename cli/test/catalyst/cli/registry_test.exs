@@ -41,6 +41,20 @@ defmodule Catalyst.CLI.RegistryTest do
     assert entry.module == "Catalyst.Plugins.GithubCI"
   end
 
+  test "resolves generated CamelCase fallback names from normalized input" do
+    registry = %{
+      "schema_version" => 1,
+      "package" => "catalyst_plugins",
+      "plugins" => %{
+        "Credo" => "Catalyst.Plugins.Credo"
+      }
+    }
+
+    assert {:ok, entry} = Registry.resolve("credo", registries: [registry])
+    assert entry.name == "Credo"
+    assert entry.module == "Catalyst.Plugins.Credo"
+  end
+
   test "resolves plugins from a registry json file" do
     path = Path.join(System.tmp_dir!(), "catalyst-registry-#{System.unique_integer()}.json")
 
