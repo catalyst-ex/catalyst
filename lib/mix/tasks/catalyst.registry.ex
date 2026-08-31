@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Catalyst.Registry do
 
   @impl true
   def run(args) do
-    {opts, files, invalid} = OptionParser.parse(args, strict: [out: :string])
+    {opts, files, invalid} = OptionParser.parse(args, strict: [out: :string, check: :boolean])
 
     if invalid != [] do
       Mix.raise("Invalid options: #{inspect(invalid)}")
@@ -18,12 +18,38 @@ defmodule Mix.Tasks.Catalyst.Registry do
     out_path = Keyword.get(opts, :out, "registry.json")
     registry = build_registry(files)
 
-    out_path
-    |> Path.dirname()
-    |> File.mkdir_p!()
+    if Keyword.get(opts, :check, false) do
+      check_registry!(out_path, registry)
+    else
+      out_path
+      |> Path.dirname()
+      |> File.mkdir_p!()
 
-    File.write!(out_path, JSON.encode!(registry))
-    Mix.shell().info("Generated Catalyst registry: #{out_path}")
+      File.write!(out_path, JSON.encode!(registry))
+      Mix.shell().info("Generated Catalyst registry: #{out_path}")
+    end
+  end
+
+  defp check_registry!(out_path, registry) do
+    unless File.exists?(out_path) do
+      Mix.raise("Registry is not up to date: #{out_path} does not exist")
+    end
+
+    current_registry =
+      out_path
+      |> File.read!()
+      |> JSON.decode!()
+
+    generated_registry =
+      registry
+      |> JSON.encode!()
+      |> JSON.decode!()
+
+    if current_registry == generated_registry do
+      Mix.shell().info("Catalyst registry is up to date: #{out_path}")
+    else
+      Mix.raise("Registry is not up to date: #{out_path}")
+    end
   end
 
   defp build_registry(files) do

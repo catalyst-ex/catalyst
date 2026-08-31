@@ -55,6 +55,10 @@ Catalyst can generate a plugin registry from plugin source files:
 
 > mix catalyst.registry --out registry.json lib/catalyst/plugins/*.ex
 
+Use `--check` in CI to verify the registry is up to date:
+
+> mix catalyst.registry --check --out registry.json lib/catalyst/plugins/*.ex
+
 Official plugins live in a sibling `catalyst_plugins` package/repository.
 The core package owns the engine, action APIs, and plugin behavior; the plugins
 package owns built-in plugin modules and their templates.

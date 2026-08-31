@@ -65,6 +65,47 @@ defmodule Mix.Tasks.Catalyst.RegistryTest do
     assert registry["plugins"]["string-name"] == inspect(module)
   end
 
+  test "check passes when registry is equivalent to generated output", %{tmp_dir: tmp_dir} do
+    module = unique_module("CheckPassingPlugin")
+    file = write_plugin!(tmp_dir, module)
+    out_path = Path.join(tmp_dir, "registry.json")
+    name = module |> Module.split() |> List.last()
+
+    File.write!(
+      out_path,
+      JSON.encode!(%{
+        schema_version: 1,
+        package: "catalyst",
+        requirement: Mix.Project.config()[:version],
+        plugins: %{name => inspect(module)}
+      })
+    )
+
+    assert :ok = Registry.run(["--check", "--out", out_path, file])
+  end
+
+  test "check raises when registry is stale", %{tmp_dir: tmp_dir} do
+    module = unique_module("CheckStalePlugin")
+    file = write_plugin!(tmp_dir, module)
+    out_path = Path.join(tmp_dir, "registry.json")
+
+    File.write!(out_path, JSON.encode!(%{schema_version: 1, package: "catalyst", plugins: %{}}))
+
+    assert_raise Mix.Error, ~r/Registry is not up to date/, fn ->
+      Registry.run(["--check", "--out", out_path, file])
+    end
+  end
+
+  test "check raises when registry is missing", %{tmp_dir: tmp_dir} do
+    module = unique_module("CheckMissingPlugin")
+    file = write_plugin!(tmp_dir, module)
+    out_path = Path.join(tmp_dir, "registry.json")
+
+    assert_raise Mix.Error, ~r/does not exist/, fn ->
+      Registry.run(["--check", "--out", out_path, file])
+    end
+  end
+
   test "raises when file does not define a plugin", %{tmp_dir: tmp_dir} do
     file = Path.join(tmp_dir, "not_a_plugin.ex")
 
