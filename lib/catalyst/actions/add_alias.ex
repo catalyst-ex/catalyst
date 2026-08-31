@@ -1,7 +1,7 @@
 defmodule Catalyst.Actions.AddAlias do
   use Catalyst.Action
 
-  alias Catalyst.CLI
+  alias Catalyst.Shell
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
   alias Sourceror.Zipper
@@ -12,13 +12,13 @@ defmodule Catalyst.Actions.AddAlias do
     key = Keyword.fetch!(action, :key)
     commands = Keyword.fetch!(action, :commands)
 
-    CLI.info("Adding alias: #{key}")
+    Shell.info("Adding alias: #{key}")
 
     patch_mix_file(path, :aliases, fn list_zipper ->
       if list_zipper do
         upsert_alias_in_list(list_zipper, key, commands)
       else
-        CLI.warn("Could not find 'aliases' function in #{path}. Skipping.")
+        Shell.warn("Could not find 'aliases' function in #{path}. Skipping.")
         list_zipper
       end
     end)
@@ -40,7 +40,7 @@ defmodule Catalyst.Actions.AddAlias do
       |> find_function_list(fun_name)
       |> case do
         nil ->
-          CLI.error("Failed to find function '#{fun_name}' in #{path}")
+          Shell.error("Failed to find function '#{fun_name}' in #{path}")
           source
 
         zipper ->
@@ -106,7 +106,7 @@ defmodule Catalyst.Actions.AddAlias do
         cmds_to_add = Enum.reject(new_cmds, &(&1 in existing_cmds))
 
         if cmds_to_add == [] do
-          CLI.warn("Alias #{key} already contains requested commands, skipping.")
+          Shell.warn("Alias #{key} already contains requested commands, skipping.")
           list_zipper
         else
           inner_list_zipper =

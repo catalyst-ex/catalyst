@@ -4,9 +4,9 @@ defmodule Catalyst do
   """
 
   alias Catalyst.ActionRunner
-  alias Catalyst.CLI
   alias Catalyst.Execution
   alias Catalyst.PluginPlanner
+  alias Catalyst.Shell
   alias Catalyst.ValidationPipeline
 
   def build(config) do
@@ -39,6 +39,6 @@ defmodule Catalyst do
   defp maybe_print_validation_summary(warnings) do
     details = warnings |> Enum.map(&("- " <> &1)) |> Enum.join("\n\n")
 
-    CLI.warn("Optional post-validations reported issues:\n\n#{details}")
+    Shell.warn("Optional post-validations reported issues:\n\n#{details}")
   end
 end

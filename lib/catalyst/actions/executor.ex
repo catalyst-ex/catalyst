@@ -1,5 +1,5 @@
 defmodule Catalyst.Actions.Executor do
-  alias Catalyst.CLI
+  alias Catalyst.Shell
   alias Catalyst.Execution
   alias Catalyst.Errors.ActionError
 
@@ -21,7 +21,7 @@ defmodule Catalyst.Actions.Executor do
   def run(action, _execution), do: unknown_action!(action)
 
   defp unknown_action!(action) do
-    CLI.warn("Unknown action encountered: #{inspect(action)}")
+    Shell.warn("Unknown action encountered: #{inspect(action)}")
 
     raise ActionError,
       reason: :unknown_action,

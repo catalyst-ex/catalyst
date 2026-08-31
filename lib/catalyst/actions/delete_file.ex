@@ -1,11 +1,11 @@
 defmodule Catalyst.Actions.DeleteFile do
   use Catalyst.Action
 
-  alias Catalyst.CLI
+  alias Catalyst.Shell
 
   @impl true
   def run([path: path], _execution) do
-    CLI.info("Deleting file: #{path}")
+    Shell.info("Deleting file: #{path}")
     File.rm(path)
   end
 end

@@ -1,4 +1,4 @@
-defmodule Catalyst.CLI do
+defmodule Catalyst.Shell do
   @moduledoc false
   require Logger
 

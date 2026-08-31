@@ -1,7 +1,7 @@
 defmodule Catalyst.Actions.SystemCommand do
   use Catalyst.Action
 
-  alias Catalyst.CLI
+  alias Catalyst.Shell
   alias Catalyst.Errors.ActionError
 
   @impl true
@@ -14,20 +14,20 @@ defmodule Catalyst.Actions.SystemCommand do
     opts = [stderr_to_stdout: true, env: env]
     opts = if cd, do: Keyword.put(opts, :cd, cd), else: opts
 
-    CLI.info("Running: #{cmd} #{Enum.join(args, " ")}")
+    Shell.info("Running: #{cmd} #{Enum.join(args, " ")}")
 
     case System.cmd(cmd, args, opts) do
       {output, 0} ->
-        CLI.debug(output)
+        Shell.debug(output)
         :ok
 
       {error, code} ->
         if allow_nonzero_exit?(cmd, args, error) do
-          CLI.warn(
+          Shell.warn(
             "Command exited with code #{code} but was allowed: #{cmd} #{Enum.join(args, " ")}"
           )
 
-          CLI.debug(error)
+          Shell.debug(error)
           :ok
         else
           raise ActionError,

@@ -65,7 +65,7 @@ defmodule Catalyst.Actions.PatchFile do
 
   use Catalyst.Action
 
-  alias Catalyst.CLI
+  alias Catalyst.Shell
   alias Catalyst.Errors.ActionError
   alias Catalyst.Execution
   alias Sourceror.Zipper
@@ -78,7 +78,7 @@ defmodule Catalyst.Actions.PatchFile do
     target = Keyword.get(action, :target)
     node = to_ast(content)
 
-    CLI.info("Patching file: #{path}")
+    Shell.info("Patching file: #{path}")
 
     unless File.exists?(path) do
       raise ActionError,
@@ -93,7 +93,7 @@ defmodule Catalyst.Actions.PatchFile do
 
     case result do
       nil ->
-        CLI.warn("Could not locate target #{inspect(target)} in #{path}. Skipping.")
+        Shell.warn("Could not locate target #{inspect(target)} in #{path}. Skipping.")
 
       zipper ->
         new_source = zipper |> Zipper.root() |> Sourceror.to_string()
@@ -101,7 +101,7 @@ defmodule Catalyst.Actions.PatchFile do
         if new_source != source do
           File.write!(path, [Code.format_string!(new_source), "\n"])
         else
-          CLI.warn("No changes made to #{path}")
+          Shell.warn("No changes made to #{path}")
         end
     end
   end
