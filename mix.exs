@@ -15,6 +15,7 @@ defmodule Catalyst.MixProject do
       description: description(),
       package: package(),
       deps: deps(),
+      compilers: Mix.compilers() ++ [:archive_deps],
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
 
@@ -71,5 +72,27 @@ defmodule Catalyst.MixProject do
       files: ~w(mix.exs lib README.md),
       links: %{"GitHub" => @github}
     ]
+  end
+end
+
+defmodule Mix.Tasks.Compile.ArchiveDeps do
+  @moduledoc false
+  use Mix.Task.Compiler
+
+  @runtime_deps [:sourceror, :ucwidth]
+
+  @impl true
+  def run(_args) do
+    compile_path = Mix.Project.compile_path()
+    build_path = Mix.Project.build_path()
+
+    Enum.each(@runtime_deps, fn dependency ->
+      build_path
+      |> Path.join("lib/#{dependency}/ebin/*.beam")
+      |> Path.wildcard()
+      |> Enum.each(&File.cp!(&1, Path.join(compile_path, Path.basename(&1))))
+    end)
+
+    {:ok, []}
   end
 end

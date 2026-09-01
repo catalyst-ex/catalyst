@@ -30,18 +30,17 @@ catalyst/
 │   │   ├── action.ex               # Action Behaviour
 │   │   ├── config.ex               # Configuration Structs
 │   │   ├── plugin.ex               # Plugin Behaviour
+│   │   ├── cli/                    # CLI support and registry lookup
 │   │   ├── actions.ex              # Actions Type Contract
 │   │   ├── actions/
 │   │   │   ├── add_file.ex         # Action Struct + Runner
 │   │   │   ├── add_dependency.ex   # Action Struct + Runner
 │   │   │   ├── system_command.ex   # Action Struct + Runner
 │   │   │   └── executor.ex         # Central Action Dispatcher
-├── cli/                            # Global Mix archive commands
-│   └── lib/
-│       └── mix/
-│           └── tasks/
-│               ├── catalyst.run.ex
-│               └── catalyst.plugin.ex
+│   └── mix/tasks/                  # Global Mix archive commands
+│       ├── catalyst.run.ex
+│       ├── catalyst.plugin.ex
+│       └── catalyst.registry.ex
 └── mix.exs
 ```
 
@@ -59,7 +58,7 @@ Use `--check` in CI to verify the registry is up to date:
 
 > mix catalyst.registry --check --out registry.json lib/catalyst/plugins/*.ex
 
-Official plugins live in a sibling `catalyst_plugins` package/repository.
+Official plugins live in the sibling `catalyst-plugins` repository.
 The core package owns the engine, action APIs, and plugin behavior; the plugins
 package owns built-in plugin modules and their templates.
 
