@@ -1,7 +1,7 @@
-defmodule Catalyst.CLI.RegistryTest do
+defmodule Catalyst.RegistryTest do
   use ExUnit.Case, async: false
 
-  alias Catalyst.CLI.Registry
+  alias Catalyst.Registry
 
   test "resolves direct module names without a registry" do
     assert {:ok, entry} = Registry.resolve("MyApp.CustomPlugin", registries: [])

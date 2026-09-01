@@ -1,7 +1,8 @@
 defmodule Mix.Tasks.Catalyst.Plugin do
   use Mix.Task
 
-  alias Catalyst.CLI.{IO, Registry}
+  alias Catalyst.CLI.IO
+  alias Catalyst.Registry
 
   @shortdoc "Installs or resolves a Catalyst plugin"
 

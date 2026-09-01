@@ -1,4 +1,4 @@
-defmodule Catalyst.CLI.Registry do
+defmodule Catalyst.Registry do
   @moduledoc """
   Resolves Catalyst plugin names from configured registries.
   """

@@ -1,7 +1,8 @@
 defmodule Catalyst.CLI.PluginRuntime do
   @moduledoc false
 
-  alias Catalyst.CLI.{IO, Registry}
+  alias Catalyst.CLI.IO
+  alias Catalyst.Registry
 
   @catalyst_version Mix.Project.config()[:version]
 
