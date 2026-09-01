@@ -37,6 +37,21 @@ defmodule Catalyst.CLI.Registry do
     end
   end
 
+  def resolve_module(module, opts \\ [])
+
+  def resolve_module(module, opts) when is_atom(module) do
+    module
+    |> Atom.to_string()
+    |> String.trim_leading("Elixir.")
+    |> resolve_module(opts)
+  end
+
+  def resolve_module(module, opts) when is_binary(module) do
+    opts
+    |> registry_sources()
+    |> resolve_module_from_sources(module)
+  end
+
   defp resolve_from_sources(sources, name) do
     Enum.reduce_while(sources, {:error, :not_found}, fn source, _acc ->
       case load_source(source) do
@@ -52,6 +67,25 @@ defmodule Catalyst.CLI.Registry do
     end)
     |> case do
       {:error, :not_found} -> {:error, {:not_found, name}}
+      result -> result
+    end
+  end
+
+  defp resolve_module_from_sources(sources, module) do
+    Enum.reduce_while(sources, {:error, :not_found}, fn source, _acc ->
+      case load_source(source) do
+        {:ok, registry} ->
+          case entry_for_module(registry, module, source) do
+            {:ok, entry} -> {:halt, {:ok, entry}}
+            :error -> {:cont, {:error, :not_found}}
+          end
+
+        {:error, reason} ->
+          {:cont, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:error, :not_found} -> {:error, {:module_not_found, module}}
       result -> result
     end
   end
@@ -145,6 +179,24 @@ defmodule Catalyst.CLI.Registry do
   end
 
   defp entry_from_registry(_registry, _names, _source), do: :error
+
+  defp entry_for_module(
+         %{
+           "schema_version" => 1,
+           "package" => package,
+           "plugins" => plugins
+         } = registry,
+         module,
+         source
+       )
+       when is_binary(package) and is_map(plugins) do
+    case Enum.find(plugins, fn {_name, registered_module} -> registered_module == module end) do
+      {name, ^module} -> {:ok, build_entry(name, module, registry, source)}
+      nil -> :error
+    end
+  end
+
+  defp entry_for_module(_registry, _module, _source), do: :error
 
   defp find_plugin(plugins, names) do
     names

@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Catalyst.Run do
   use Mix.Task
 
-  alias Catalyst.CLI.IO
+  alias Catalyst.CLI.{IO, PluginRuntime}
   alias Catalyst.Config.Loader
   alias Catalyst.Errors.CLIError
 
@@ -22,9 +22,18 @@ defmodule Mix.Tasks.Catalyst.Run do
   defp generate_from_config(path) do
     IO.info("Loading configuration from #{path}...")
 
-    # Load configuration
     config = Loader.load!(path)
+    working_dir = File.cwd!()
+    dependencies = PluginRuntime.dependencies(config.plugins)
 
+    if dependencies == [] do
+      run_config(config)
+    else
+      PluginRuntime.run(path, working_dir, dependencies)
+    end
+  end
+
+  defp run_config(config) do
     case config.mode do
       :existing ->
         IO.info("Running Catalyst on existing project #{config.app.name}...")
@@ -35,7 +44,6 @@ defmodule Mix.Tasks.Catalyst.Run do
         ensure_new_project_target!(config.app.path)
     end
 
-    # Build the app
     {:ok, _execution} = Catalyst.build(config)
 
     IO.success("Done! Catalyst finished in #{Path.expand(config.app.path)}")

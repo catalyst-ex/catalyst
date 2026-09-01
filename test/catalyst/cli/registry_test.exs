@@ -27,6 +27,35 @@ defmodule Catalyst.CLI.RegistryTest do
     assert entry.requirement == "~> 1.0"
   end
 
+  test "resolves a module back to its registry package" do
+    registry = %{
+      "schema_version" => 1,
+      "package" => "catalyst_plugins",
+      "requirement" => "1.0.0-beta.0",
+      "plugins" => %{
+        "Credo" => "Catalyst.Plugins.Credo"
+      }
+    }
+
+    assert {:ok, entry} =
+             Registry.resolve_module(Catalyst.Plugins.Credo, registries: [registry])
+
+    assert entry.name == "Credo"
+    assert entry.package == "catalyst_plugins"
+    assert entry.requirement == "1.0.0-beta.0"
+  end
+
+  test "returns not found when a module is absent from all registries" do
+    registry = %{
+      "schema_version" => 1,
+      "package" => "catalyst_plugins",
+      "plugins" => %{}
+    }
+
+    assert {:error, {:module_not_found, "Missing.Plugin"}} =
+             Registry.resolve_module(Missing.Plugin, registries: [registry])
+  end
+
   test "normalizes underscores to hyphens for registry lookup" do
     registry = %{
       "schema_version" => 1,
