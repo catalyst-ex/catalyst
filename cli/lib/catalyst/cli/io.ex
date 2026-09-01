@@ -4,19 +4,19 @@ defmodule Catalyst.CLI.IO do
   require Logger
 
   def info(message) when is_binary(message) do
-    Owl.IO.puts([Owl.Data.tag("info", :cyan), " ", message])
+    Mix.shell().info([:cyan, "info", :reset, " ", message])
   end
 
   def success(message) when is_binary(message) do
-    Owl.IO.puts([Owl.Data.tag("ok", :green), " ", message])
+    Mix.shell().info([:green, "ok", :reset, " ", message])
   end
 
   def warn(message) when is_binary(message) do
-    Owl.IO.puts([Owl.Data.tag("warn", :yellow), " ", message])
+    Mix.shell().info([:yellow, "warn", :reset, " ", message])
   end
 
   def error(message) when is_binary(message) do
-    Owl.IO.puts([Owl.Data.tag("error", :red), " ", message])
+    Mix.shell().error([:red, "error", :reset, " ", message])
   end
 
   def debug(message) when is_binary(message) do
@@ -24,10 +24,12 @@ defmodule Catalyst.CLI.IO do
   end
 
   def puts(message) when is_binary(message) do
-    Owl.IO.puts(message)
+    Mix.shell().info(message)
   end
 
   def puts(data) do
-    Owl.IO.puts(data)
+    data
+    |> inspect()
+    |> Mix.shell().info()
   end
 end
