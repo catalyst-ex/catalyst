@@ -18,7 +18,6 @@ defmodule Catalyst.Actions.SystemCommand do
 
     case System.cmd(cmd, args, opts) do
       {output, 0} ->
-        Logger.debug(output)
         :ok
 
       {error, code} ->

@@ -4,13 +4,17 @@ defmodule Mix.Tasks.Catalyst.Run do
   alias Catalyst.CLI.{IO, PluginRuntime}
   alias Catalyst.Config.Loader
   alias Catalyst.Errors.CLIError
+  alias Catalyst.Trace.Formatter
 
   @shortdoc "Creates a new app from a configuration file"
 
   def run(args) do
     case args do
       [config_path] ->
-        generate_from_config(config_path)
+        generate_from_config(config_path, :execute)
+
+      [config_path, "--explain"] ->
+        generate_from_config(config_path, :explain)
 
       _ ->
         raise CLIError,
@@ -19,7 +23,7 @@ defmodule Mix.Tasks.Catalyst.Run do
     end
   end
 
-  defp generate_from_config(path) do
+  defp generate_from_config(path, mode) do
     IO.info("Loading configuration from #{path}...")
 
     config = Loader.load!(path)
@@ -27,13 +31,13 @@ defmodule Mix.Tasks.Catalyst.Run do
     dependencies = PluginRuntime.dependencies(config.plugins)
 
     if dependencies == [] do
-      run_config(config)
+      run_config(config, mode)
     else
-      PluginRuntime.run(path, working_dir, dependencies)
+      PluginRuntime.run(path, working_dir, dependencies, mode)
     end
   end
 
-  defp run_config(config) do
+  defp run_config(config, mode) do
     case config.mode do
       :existing ->
         IO.info("Running Catalyst on existing project #{config.app.name}...")
@@ -44,9 +48,16 @@ defmodule Mix.Tasks.Catalyst.Run do
         ensure_new_project_target!(config.app.path)
     end
 
-    {:ok, _execution} = Catalyst.build(config)
+    {:ok, execution} = Catalyst.build(config, mode)
 
-    IO.success("Done! Catalyst finished in #{Path.expand(config.app.path)}")
+    case mode do
+      :explain ->
+        IO.info(Formatter.format(execution.traces))
+        IO.info(Formatter.summary(execution.traces))
+
+      _ ->
+        IO.success("Done! Catalyst finished in #{Path.expand(config.app.path)}")
+    end
   end
 
   # -- Helpers --

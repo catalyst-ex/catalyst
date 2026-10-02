@@ -22,7 +22,7 @@ defmodule Catalyst.CLI.PluginRuntime do
     |> Enum.uniq_by(& &1.package)
   end
 
-  def run(config_path, working_dir, dependencies)
+  def run(config_path, working_dir, dependencies, mode)
       when is_binary(config_path) and is_binary(working_dir) and is_list(dependencies) do
     runtime_dir = runtime_dir()
     File.mkdir_p!(runtime_dir)
@@ -40,7 +40,8 @@ defmodule Catalyst.CLI.PluginRuntime do
         "runner.exs",
         "--",
         Path.expand(config_path, working_dir),
-        working_dir
+        working_dir,
+        Atom.to_string(mode)
       ])
     after
       File.rm_rf!(runtime_dir)
@@ -108,9 +109,9 @@ defmodule Catalyst.CLI.PluginRuntime do
 
   defp runner_script do
     """
-    [config_path, working_dir] =
+    [config_path, working_dir, mode] =
       case System.argv() do
-        ["--", config_path, working_dir] -> [config_path, working_dir]
+        ["--", config_path, working_dir, mode] -> [config_path, working_dir, String.to_existing_atom(mode)]
         args -> args
       end
 
@@ -135,8 +136,15 @@ defmodule Catalyst.CLI.PluginRuntime do
           end
       end
 
-      {:ok, _execution} = Catalyst.build(config)
-      Mix.shell().info("Done! Catalyst finished in \#{Path.expand(config.app.path)}")
+      {:ok, execution} = Catalyst.build(config, mode)
+
+      case mode do
+      :explain ->
+        Mix.shell().info(Catalyst.Trace.Formatter.format(execution.traces))
+        Mix.shell().info(Catalyst.Trace.Formatter.summary(execution.traces))
+
+      _ -> Mix.shell().info("Done! Catalyst finished in \#{Path.expand(config.app.path)}")
+      end
     end)
     """
   end

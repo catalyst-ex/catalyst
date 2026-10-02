@@ -5,8 +5,10 @@ defmodule Catalyst.Execution do
 
   defstruct [
     :config,
+    :mode,
     plugin_runs: [],
-    action_executions: []
+    action_executions: [],
+    traces: []
   ]
 
   def new(opts \\ [])
@@ -15,17 +17,15 @@ defmodule Catalyst.Execution do
   def new(%{} = attrs) do
     %__MODULE__{
       config: Map.get(attrs, :config),
+      mode: Map.get(attrs, :mode),
       plugin_runs: Map.get(attrs, :plugin_runs, []),
-      action_executions: Map.get(attrs, :action_executions, [])
+      action_executions: Map.get(attrs, :action_executions, []),
+      traces: Map.get(attrs, :traces, [])
     }
   end
 
-  def from_config(config) do
-    new(%{
-      config: config,
-      plugin_runs: [],
-      action_executions: []
-    })
+  def from_config(config, mode) do
+    new(config: config, mode: mode)
   end
 
   def record_plugin_run(%__MODULE__{} = execution, run) when is_map(run) do

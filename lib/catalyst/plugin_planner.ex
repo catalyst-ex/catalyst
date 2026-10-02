@@ -5,6 +5,7 @@ defmodule Catalyst.PluginPlanner do
   alias Catalyst.Execution
   alias Catalyst.PluginOptionParser
   alias Catalyst.ValidationAction
+  alias Catalyst.Trace
 
   def collect(plugin_specs, execution) do
     plugin_specs
@@ -15,7 +16,7 @@ defmodule Catalyst.PluginPlanner do
       try do
         opts = PluginOptionParser.validate!(plugin_mod, raw_opts, execution_acc.config)
 
-        {plugin_actions, validation_actions} =
+        {execution_acc, plugin_actions, validation_actions} =
           collect_plugin_actions(plugin_mod, execution_acc, opts)
 
         execution_acc =
@@ -57,7 +58,20 @@ defmodule Catalyst.PluginPlanner do
   # -- Helpers --
 
   defp collect_plugin_actions(plugin_mod, execution, opts) do
-    plugin_actions = plugin_mod.run(execution, opts)
+    {execution, plugin_actions} =
+      Trace.trace(
+        execution,
+        :plugin,
+        plugin_mod,
+        :planning,
+        fn execution ->
+          plugin_actions = plugin_mod.run(execution, opts)
+          {execution, plugin_actions}
+        end,
+        metadata: %{
+          opts: opts
+        }
+      )
 
     # validate plugin actions are properly formed and tag them with plugin metadata
     # for later processing in the validation pipeline
@@ -87,7 +101,7 @@ defmodule Catalyst.PluginPlanner do
             context: %{plugin: plugin_mod, item: invalid}
       end)
 
-    {plugin_actions, validation_actions}
+    {execution, plugin_actions, validation_actions}
   end
 
   defp normalize_plugin_spec!({plugin_mod, opts}) when is_atom(plugin_mod) and is_list(opts),

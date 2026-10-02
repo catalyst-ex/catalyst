@@ -4,6 +4,7 @@ defmodule Catalyst.ActionRunner do
   alias Catalyst.ActionExecution
   alias Catalyst.Actions.Executor
   alias Catalyst.Execution
+  alias Catalyst.Trace
 
   def run(action_entries, execution) do
     action_entries
@@ -14,7 +15,27 @@ defmodule Catalyst.ActionRunner do
                                        },
                                        {execution_acc, executed_actions} ->
       try do
-        result = Executor.run(action, execution_acc)
+        {execution_acc, result} =
+          Trace.trace(
+            execution_acc,
+            :action,
+            elem(action, 0),
+            :execution,
+            fn %Execution{mode: mode} = execution ->
+              case mode do
+                :explain ->
+                  {execution, []}
+
+                _ ->
+                  result = Executor.run(action, execution)
+                  {execution, result}
+              end
+            end,
+            metadata: %{
+              opts: elem(action, 1),
+              plugin: plugin
+            }
+          )
 
         action_execution =
           ActionExecution.new(%{
