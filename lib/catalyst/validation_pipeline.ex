@@ -7,6 +7,7 @@ defmodule Catalyst.ValidationPipeline do
   alias Catalyst.Execution
   alias Catalyst.Errors.ValidationError
   alias Catalyst.ValidationAction
+  alias Catalyst.Trace
 
   def run(validations, existing_actions, execution) do
     validations
@@ -39,8 +40,8 @@ defmodule Catalyst.ValidationPipeline do
               List.update_at(ordered_acc, position, fn %ValidationAction{} = existing ->
                 %{
                   existing
-                  | required: existing.required or validation.required,
-                    plugins: Enum.uniq(existing.plugins ++ validation.plugins)
+                | required: existing.required or validation.required,
+                  plugins: Enum.uniq(existing.plugins ++ validation.plugins)
                 }
               end)
 
@@ -56,7 +57,32 @@ defmodule Catalyst.ValidationPipeline do
 
   defp execute_validation_actions(validations, execution) do
     Enum.reduce(validations, {[], execution}, fn validation, {warnings, execution_acc} ->
-      case run_action(validation.action, execution_acc) do
+      {action_mod, action_opts} = validation.action
+
+      {execution_acc, result} =
+        Trace.trace(
+          execution_acc,
+          :action,
+          action_mod,
+          :post_validation,
+          fn %Execution{mode: mode} = execution ->
+            case mode do
+              :explain ->
+                {execution, {:ok, []}}
+
+              _ ->
+                result = run_action(validation.action, execution)
+                {execution, result}
+            end
+          end,
+          metadata: %{
+            validator: Keyword.get(action_opts, :function),
+            plugins: validation.plugins,
+            required: validation.required
+          }
+        )
+
+      case result do
         {:ok, result} ->
           action_execution =
             ActionExecution.new(%{
@@ -91,8 +117,8 @@ defmodule Catalyst.ValidationPipeline do
 
           if validation.required do
             raise ValidationError,
-              reason: :post_validation_failed,
-              context: %{validation: validation, error: Exception.message(reason)}
+                  reason: :post_validation_failed,
+                  context: %{validation: validation, error: Exception.message(reason)}
           else
             {[message | warnings], execution_acc}
           end

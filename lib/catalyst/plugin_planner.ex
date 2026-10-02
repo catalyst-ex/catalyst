@@ -5,6 +5,7 @@ defmodule Catalyst.PluginPlanner do
   alias Catalyst.Execution
   alias Catalyst.PluginOptionParser
   alias Catalyst.ValidationAction
+  alias Catalyst.Trace
 
   def collect(plugin_specs, execution) do
     plugin_specs
@@ -15,7 +16,7 @@ defmodule Catalyst.PluginPlanner do
       try do
         opts = PluginOptionParser.validate!(plugin_mod, raw_opts, execution_acc.config)
 
-        {plugin_actions, validation_actions} =
+        {execution_acc, plugin_actions, validation_actions} =
           collect_plugin_actions(plugin_mod, execution_acc, opts)
 
         execution_acc =
@@ -57,7 +58,20 @@ defmodule Catalyst.PluginPlanner do
   # -- Helpers --
 
   defp collect_plugin_actions(plugin_mod, execution, opts) do
-    plugin_actions = plugin_mod.run(execution, opts)
+    {execution, plugin_actions} =
+      Trace.trace(
+        execution,
+        :plugin,
+        plugin_mod,
+        :planning,
+        fn execution ->
+          plugin_actions = plugin_mod.run(execution, opts)
+          {execution, plugin_actions}
+        end,
+        metadata: %{
+          opts: opts
+        }
+      )
 
     # validate plugin actions are properly formed and tag them with plugin metadata
     # for later processing in the validation pipeline
@@ -72,26 +86,26 @@ defmodule Catalyst.PluginPlanner do
             %{validation | plugins: [plugin_mod]}
           else
             raise PluginError,
-              reason: :invalid_validation_action,
-              context: %{plugin: plugin_mod, action: {mod, action_opts}}
+                  reason: :invalid_validation_action,
+                  context: %{plugin: plugin_mod, action: {mod, action_opts}}
           end
 
         %ValidationAction{action: action} ->
           raise PluginError,
-            reason: :invalid_validation_action,
-            context: %{plugin: plugin_mod, action: action}
+                reason: :invalid_validation_action,
+                context: %{plugin: plugin_mod, action: action}
 
         invalid ->
           raise PluginError,
-            reason: :invalid_post_validate_item,
-            context: %{plugin: plugin_mod, item: invalid}
+                reason: :invalid_post_validate_item,
+                context: %{plugin: plugin_mod, item: invalid}
       end)
 
-    {plugin_actions, validation_actions}
+    {execution, plugin_actions, validation_actions}
   end
 
   defp normalize_plugin_spec!({plugin_mod, opts}) when is_atom(plugin_mod) and is_list(opts),
-    do: {plugin_mod, opts}
+       do: {plugin_mod, opts}
 
   defp normalize_plugin_spec!({plugin_mod}) when is_atom(plugin_mod), do: {plugin_mod, []}
 
@@ -99,20 +113,20 @@ defmodule Catalyst.PluginPlanner do
 
   defp normalize_plugin_spec!(invalid) do
     raise PluginError,
-      reason: :invalid_plugin_spec,
-      context: %{plugin_spec: invalid}
+          reason: :invalid_plugin_spec,
+          context: %{plugin_spec: invalid}
   end
 
   defp reraise_with_plugin_failure(%PluginError{} = error, plugin_run) do
     raise PluginError,
-      reason: error.reason,
-      message: error.message,
-      context: Map.put(error.context || %{}, :plugin_run, plugin_run)
+          reason: error.reason,
+          message: error.message,
+          context: Map.put(error.context || %{}, :plugin_run, plugin_run)
   end
 
   defp reraise_with_plugin_failure(error, plugin_run) do
     raise PluginError,
-      reason: :plugin_execution_failed,
-      context: %{plugin_run: plugin_run, error: Exception.message(error)}
+          reason: :plugin_execution_failed,
+          context: %{plugin_run: plugin_run, error: Exception.message(error)}
   end
 end
