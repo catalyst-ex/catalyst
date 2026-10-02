@@ -10,7 +10,7 @@ defmodule Catalyst do
   alias Catalyst.PluginPlanner
   alias Catalyst.ValidationPipeline
 
-  def build(config, mode) do
+  def build(config, mode \\ :execute) do
     execution = Execution.from_config(config, mode)
 
     # collect plugins actions and post-validations

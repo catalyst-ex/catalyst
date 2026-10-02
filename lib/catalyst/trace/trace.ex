@@ -48,13 +48,13 @@ defmodule Catalyst.Trace do
   ]
 
   @spec trace(
-          %Execution{},
+          Execution.t(),
           type(),
           module(),
           phase(),
-          (%Execution{} -> {%Execution{}, term()}),
+          (Execution.t() -> {Execution.t(), term()}),
           keyword()
-        ) :: {%Execution{}, term()}
+        ) :: {Execution.t(), term()}
 
   def trace(
         %Execution{} = execution,
@@ -102,7 +102,7 @@ defmodule Catalyst.Trace do
 
   # Helpers
 
-  @spec start_trace(%Execution{}, keyword()) :: {%Execution{}, integer()}
+  @spec start_trace(Execution.t(), keyword()) :: {Execution.t(), integer()}
   defp start_trace(%Execution{} = execution, opts) do
     trace =
       struct(
@@ -120,7 +120,7 @@ defmodule Catalyst.Trace do
     {execution, trace.id}
   end
 
-  @spec finish_trace(%Execution{}, integer()) :: {%Execution{}, integer()}
+  @spec finish_trace(Execution.t(), integer()) :: {Execution.t(), integer()}
   defp finish_trace(%Execution{} = execution, trace_id) do
     finished_at = DateTime.utc_now()
 
@@ -135,8 +135,8 @@ defmodule Catalyst.Trace do
     {execution, trace_id}
   end
 
-  @spec fail_trace(%Execution{}, integer(), Exception.t()) ::
-          {%Execution{}, integer()}
+  @spec fail_trace(Execution.t(), integer(), Exception.t()) ::
+          {Execution.t(), integer()}
   defp fail_trace(%Execution{} = execution, trace_id, error) do
     finished_at = DateTime.utc_now()
 
@@ -157,7 +157,7 @@ defmodule Catalyst.Trace do
     {execution, trace_id}
   end
 
-  @spec update_trace(%Execution{}, integer(), keyword()) :: %Execution{}
+  @spec update_trace(Execution.t(), integer(), keyword()) :: Execution.t()
   defp update_trace(%Execution{} = execution, trace_id, opts) do
     trace = get_trace!(execution, trace_id)
 
@@ -184,7 +184,7 @@ defmodule Catalyst.Trace do
     %{execution | traces: traces}
   end
 
-  @spec get_trace!(%Execution{}, integer()) :: t()
+  @spec get_trace!(Execution.t(), integer()) :: t()
   defp get_trace!(%Execution{traces: traces}, trace_id),
     do: Enum.find(traces, &(&1.id == trace_id))
 
