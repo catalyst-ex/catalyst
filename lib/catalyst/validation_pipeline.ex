@@ -40,8 +40,8 @@ defmodule Catalyst.ValidationPipeline do
               List.update_at(ordered_acc, position, fn %ValidationAction{} = existing ->
                 %{
                   existing
-                | required: existing.required or validation.required,
-                  plugins: Enum.uniq(existing.plugins ++ validation.plugins)
+                  | required: existing.required or validation.required,
+                    plugins: Enum.uniq(existing.plugins ++ validation.plugins)
                 }
               end)
 
@@ -117,8 +117,8 @@ defmodule Catalyst.ValidationPipeline do
 
           if validation.required do
             raise ValidationError,
-                  reason: :post_validation_failed,
-                  context: %{validation: validation, error: Exception.message(reason)}
+              reason: :post_validation_failed,
+              context: %{validation: validation, error: Exception.message(reason)}
           else
             {[message | warnings], execution_acc}
           end

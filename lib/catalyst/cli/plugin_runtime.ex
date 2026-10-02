@@ -143,7 +143,7 @@ defmodule Catalyst.CLI.PluginRuntime do
         Mix.shell().info(Catalyst.Trace.Formatter.format(execution.traces))
         Mix.shell().info(Catalyst.Trace.Formatter.summary(execution.traces))
 
-      _ -> Mix.shell().info("Done! Catalyst finished in #{Path.expand(config.app.path)}")
+      _ -> Mix.shell().info("Done! Catalyst finished in \#{Path.expand(config.app.path)}")
       end
     end)
     """
